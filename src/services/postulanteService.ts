@@ -13,20 +13,36 @@ export const postulanteService = {
     return response.data;
   },
 
-  // Ver ofertas de trabajo
+  // Ver ofertas de trabajo (con filtros mejorados)
   getJobOffers: async (filters?: {
-    modality?: string;
+    search?: string;
+    location?: string;
+    modality?: string | string[];
     sector?: string;
-    city?: string;
-    disabilityId?: string;
+    disabilityIds?: string[];
   }) => {
     const params = new URLSearchParams();
-    if (filters?.modality) params.append('modality', filters.modality);
+    if (filters?.search) params.append('search', filters.search);
+    if (filters?.location) params.append('location', filters.location);
+    if (filters?.modality) {
+      if (Array.isArray(filters.modality)) {
+        filters.modality.forEach((m) => params.append('modality', m));
+      } else {
+        params.append('modality', filters.modality);
+      }
+    }
     if (filters?.sector) params.append('sector', filters.sector);
-    if (filters?.city) params.append('city', filters.city);
-    if (filters?.disabilityId) params.append('disabilityId', filters.disabilityId);
-    
+    if (filters?.disabilityIds) {
+      filters.disabilityIds.forEach((id) => params.append('disabilityId', id));
+    }
+
     const response = await api.get(`/postulantes/ofertas?${params.toString()}`);
+    return response.data;
+  },
+
+  // Ver UNA oferta por ID
+  getJobOfferById: async (id: string) => {
+    const response = await api.get(`/job-offers/${id}`);
     return response.data;
   },
 

@@ -5,9 +5,14 @@ import type { ReactNode } from 'react';
 // Páginas públicas
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
+import HomePage from '../pages/public/HomePage';
 
-// Páginas protegidas
-import PostulanteDashboard from '../pages/postulante/PostulanteDashboard';
+// Páginas postulante
+import EmpleosPage from '../pages/postulante/EmpleosPage';
+// import PostulacionesPage from '../pages/postulante/PostulacionesPage';
+// import PerfilPage from '../pages/postulante/PerfilPage';
+import DetalleEmpleoPage from '../pages/postulante/DetalleEmpleoPage';
+
 import EmpresaDashboard from '../pages/empresa/EmpresaDashboard';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 
@@ -32,10 +37,23 @@ const ProtectedRoute = ({
   return <>{children}</>;
 };
 
+const RoleRedirect = () => {
+  const { isAuthenticated, user } = useAuthStore();
+  
+  if (!isAuthenticated) return <Navigate to="/" replace />;
+  if (user?.role === 'POSTULANTE') return <Navigate to="/postulante" replace />;
+  if (user?.role === 'EMPRESA') return <Navigate to="/empresa" replace />;
+  if (user?.role === 'SUPERADMIN') return <Navigate to="/admin" replace />;
+  
+  return <Navigate to="/" replace />;
+};
+
 const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Landing - accesible para todos */}
+        <Route path="/" element={<HomePage />} />
         {/* Públicas */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
@@ -45,9 +63,17 @@ const AppRouter = () => {
           path="/postulante/*" 
           element={
             <ProtectedRoute allowedRoles={['POSTULANTE']}>
-              <PostulanteDashboard />
+              <EmpleosPage />
             </ProtectedRoute>
           } 
+        />
+        <Route
+          path="/postulante/empleos/:id"
+          element={
+            <ProtectedRoute allowedRoles={['POSTULANTE']}>
+              <DetalleEmpleoPage />
+            </ProtectedRoute>
+          }
         />
         
         {/* Empresa */}
@@ -69,9 +95,12 @@ const AppRouter = () => {
             </ProtectedRoute>
           } 
         />
+
+        {/* Redirect inteligente */}
+        <Route path="/dashboard" element={<RoleRedirect />} />
         
         {/* Redirect por defecto */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

@@ -5,6 +5,7 @@ import {
   ArrowRight, 
   CheckCircle,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Step1PostulanteProps {
   onContinue: (data: {
@@ -76,6 +77,9 @@ const Step1Postulante = ({ onContinue, onBack }: Step1PostulanteProps) => {
 
   const progress = 50;
 
+  const navigate = useNavigate();
+  const goToLogin = () => { navigate('/login'); };
+
   return (
     <div className="min-h-screen bg-[#fff8f1] text-[#201b0f] relative">
       {/* Regresar */}
@@ -89,6 +93,14 @@ const Step1Postulante = ({ onContinue, onBack }: Step1PostulanteProps) => {
         >
         <ArrowLeft className="w-5 h-5" />
       </button>
+      <div className="hidden md:flex items-center gap-6">
+        <button
+          onClick={goToLogin}
+          className="absolute top-4 right-4 z-50 text-teal font-bold font-['Plus_Jakarta_Sans'] hover:underline transition-all"
+        >
+          Ya tengo cuenta
+        </button>
+      </div>
 
       <main className="max-w-4xl mx-auto px-6 py-12">
         {/* Progress Bar */}

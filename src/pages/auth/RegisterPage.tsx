@@ -1,22 +1,25 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { authService } from '../../services/authService';
 import { postulanteService } from '../../services/postulanteService';
 import { empresaService } from '../../services/empresaService';
-import StepRoleSelection from '../../components/auth/StepRoleSelection';
 import Step1Postulante from '../../components/auth/postulante/Step1Postulante';
 import Step2Postulante from '../../components/auth/postulante/Step2Postulante';
 import Step1Empresa from '../../components/auth/empresa/Step1Empresa';
 import Step2Empresa from '../../components/auth/empresa/Step2Empresa';
 
+type Step = 'postulante1' | 'postulante2' | 'empresa1' | 'empresa2';
+
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { setAuth } = useAuthStore();
-  
-  const [step, setStep] = useState<'role' | 'postulante1' | 'postulante2' | 'empresa1' | 'empresa2'>('role');
-  const [selectedRole, setSelectedRole] = useState<'POSTULANTE' | 'EMPRESA' | null>(null);
-  
+
+  const roleParam = searchParams.get('role');
+
+  const [step, setStep] = useState<Step>('postulante1');
+
   // Datos acumulados del postulante
   const [postulanteData, setPostulanteData] = useState<{
     nombres: string;
@@ -39,14 +42,17 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSelectRole = (role: 'POSTULANTE' | 'EMPRESA') => {
-    setSelectedRole(role);
-    if (role === 'POSTULANTE') {
+  // Validar role param y setear step inicial
+  useEffect(() => {
+    if (roleParam === 'postulante') {
       setStep('postulante1');
-    } else {
+    } else if (roleParam === 'empresa') {
       setStep('empresa1');
+    } else {
+      // Si no hay role válido, redirigir al home
+      navigate('/', { replace: true });
     }
-  };
+  }, [roleParam, navigate]);
 
   const handlePostulanteStep1 = (data: {
     nombres: string;
@@ -70,22 +76,19 @@ const RegisterPage = () => {
     departamento: string;
   }) => {
     if (!postulanteData) return;
-    
+
     setLoading(true);
     setError('');
 
     try {
-      // 1. Registrar usuario
       const authResponse = await authService.register({
         email: data.email,
         password: data.password,
         role: 'POSTULANTE',
       });
 
-      // 2. ✅ GUARDAR AUTH PRIMERO (para que updateProfile tenga token)
       setAuth(authResponse.user, authResponse.accessToken, authResponse.refreshToken);
 
-      // 3. Actualizar perfil (ahora sí tiene token)
       await postulanteService.updateProfile({
         nombres: postulanteData.nombres,
         apellidos: postulanteData.apellidos,
@@ -121,7 +124,7 @@ const RegisterPage = () => {
     telefonoContacto: string;
   }) => {
     if (!empresaData) return;
-    
+
     setLoading(true);
     setError('');
 
@@ -132,7 +135,6 @@ const RegisterPage = () => {
         role: 'EMPRESA',
       });
 
-      // ✅ GUARDAR AUTH PRIMERO
       setAuth(authResponse.user, authResponse.accessToken, authResponse.refreshToken);
 
       await empresaService.updateProfile({
@@ -163,26 +165,22 @@ const RegisterPage = () => {
       setStep('postulante1');
     } else if (step === 'empresa2') {
       setStep('empresa1');
-    } else if (step === 'postulante1' || step === 'empresa1') {
-      setStep('role');
-      setSelectedRole(null);
+    } else {
+      // Si está en el primer paso, volver al home
+      navigate('/');
     }
   };
 
   // Render según el paso actual
-  if (step === 'role') {
-    return <StepRoleSelection onSelectRole={handleSelectRole} onGoToLogin={goToLogin} />;
-  }
-
   if (step === 'postulante1') {
     return <Step1Postulante onContinue={handlePostulanteStep1} onBack={goBack} />;
   }
 
   if (step === 'postulante2') {
     return (
-      <Step2Postulante 
-        onSubmit={handlePostulanteStep2} 
-        onBack={goBack} 
+      <Step2Postulante
+        onSubmit={handlePostulanteStep2}
+        onBack={goBack}
       />
     );
   }
@@ -192,8 +190,16 @@ const RegisterPage = () => {
   }
 
   if (step === 'empresa2') {
-    return <Step2Empresa onSubmit={handleEmpresaStep2} onBack={goBack} />;
+    return (
+      <Step2Empresa
+        onSubmit={handleEmpresaStep2}
+        onBack={goBack}
+      />
+    );
   }
+
+  // Fallback mientras carga el useEffect
+  return null;
 };
 
 export default RegisterPage;

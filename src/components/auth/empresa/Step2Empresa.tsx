@@ -41,14 +41,11 @@ const Step2Empresa = ({ onSubmit, onBack }: Step2EmpresaProps) => {
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
-          <h1 className="font-['Plus_Jakarta_Sans'] text-xl font-bold tracking-tight text-[#1D9E75]">
-            Registro de Empresa
-          </h1>
         </div>
-        <div className="hidden md:flex items-center gap-6">
+        {/* <div className="hidden md:flex items-center gap-6">
           <span className="text-stone-500 font-['Plus_Jakarta_Sans']">Paso 1</span>
           <span className="text-[#a8380f] font-bold font-['Plus_Jakarta_Sans']">Paso 2</span>
-        </div>
+        </div> */}
       </header>
 
       <main className="flex-1 max-w-4xl mx-auto px-6 py-4 flex flex-col justify-center">
@@ -165,7 +162,7 @@ const Step2Empresa = ({ onSubmit, onBack }: Step2EmpresaProps) => {
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between pt-4 shrink-0">
+          <div className="flex items-center justify-between pt-4 shrink-0 gap-4">
             <p className="text-[#3d4943] text-sm italic">
               Tu empresa quedará en estado "pendiente de aprobación".
             </p>

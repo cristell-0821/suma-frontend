@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, ArrowRight, Building2, FileText, User, Users, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Step1EmpresaProps {
   onContinue: (data: {
@@ -39,6 +40,8 @@ const Step1Empresa = ({ onContinue, onBack }: Step1EmpresaProps) => {
   };
 
   const progress = 50;
+  const navigate = useNavigate();
+  const goToLogin = () => { navigate('/login'); };
 
   return (
     <div className="min-h-screen bg-[#fff8f1] text-[#201b0f] flex flex-col">
@@ -51,13 +54,14 @@ const Step1Empresa = ({ onContinue, onBack }: Step1EmpresaProps) => {
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
-          <h1 className="font-['Plus_Jakarta_Sans'] text-xl font-bold tracking-tight text-[#1D9E75]">
-            Registro de Empresa
-          </h1>
         </div>
         <div className="hidden md:flex items-center gap-6">
-          <span className="text-[#a8380f] font-bold font-['Plus_Jakarta_Sans']">Paso 1</span>
-          <span className="text-stone-500 font-['Plus_Jakarta_Sans']">Paso 2</span>
+          <button
+            onClick={goToLogin}
+            className="text-teal font-bold font-['Plus_Jakarta_Sans'] hover:underline transition-all"
+          >
+            Ya tengo cuenta
+          </button>
         </div>
       </header>
 

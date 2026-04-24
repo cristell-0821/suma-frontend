@@ -23,7 +23,7 @@ module.exports = {
         },
         cream: {
           DEFAULT: '#FAEEDA',
-          50: '#FFFCF7',
+          50: '#FFF8F1',
           100: '#FAEEDA',
         },
         brown: {
