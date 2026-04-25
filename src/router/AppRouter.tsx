@@ -24,13 +24,15 @@ const ProtectedRoute = ({
   children: ReactNode; 
   allowedRoles: string[] 
 }) => {
-  const { isAuthenticated, user } = useAuthStore();
+  const { user, logout } = useAuthStore();
+  const token = localStorage.getItem('accessToken');
   
-  if (!isAuthenticated) {
+  if (!token || !user) {
+    logout();
     return <Navigate to="/login" replace />;
   }
   
-  if (!allowedRoles.includes(user?.role || '')) {
+  if (!allowedRoles.includes(user.role)) {
     return <Navigate to="/" replace />;
   }
   

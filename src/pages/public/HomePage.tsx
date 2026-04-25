@@ -5,21 +5,40 @@ import { UserPlus, Network, PartyPopper, ArrowRight } from "lucide-react";
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, logout } = useAuthStore();
+
+  const getToken = () => localStorage.getItem('accessToken');
 
   const handleBuscoEmpleo = () => {
-    if (isAuthenticated && user?.role === 'POSTULANTE') {
-      navigate('/postulante');
+    const token = getToken();
+    if (token && user?.role === 'POSTULANTE') {
+      navigate('/postulante/empleos');
     } else {
+      if (!token) logout();
       navigate('/registro?role=postulante');
     }
   };
 
   const handleSoyEmpresa = () => {
-    if (isAuthenticated && user?.role === 'EMPRESA') {
+    const token = getToken();
+    if (token && user?.role === 'EMPRESA') {
       navigate('/empresa');
     } else {
+      if (!token) logout();
       navigate('/registro?role=empresa');
+    }
+  };
+
+  const handleShowMyPotential = () => {
+    const token = getToken();
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    if (user?.role === 'POSTULANTE') {
+      navigate('/postulante/empleos');
+    } else if (user?.role === 'EMPRESA') {
+      navigate('/empresa');
     }
   };
 

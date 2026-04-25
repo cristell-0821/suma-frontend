@@ -1,5 +1,7 @@
+// src/stores/authStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import api from '../lib/axios';
 
 export type UserRole = 'POSTULANTE' | 'EMPRESA' | 'SUPERADMIN';
 
@@ -17,11 +19,12 @@ interface AuthState {
   
   setAuth: (user: User, accessToken: string, refreshToken: string) => void;
   logout: () => void;
+  checkAuth: () => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       accessToken: null,
       refreshToken: null,
@@ -37,6 +40,25 @@ export const useAuthStore = create<AuthState>()(
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
+      },
+
+      checkAuth: async () => {
+        const token = get().accessToken || localStorage.getItem('accessToken');
+        if (!token) {
+          get().logout();
+          return false;
+        }
+
+        try {
+          // Hacemos una petición light para validar el token
+          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          const response = await api.get('/auth/me'); // o el endpoint que tengas
+          set({ user: response.data, isAuthenticated: true });
+          return true;
+        } catch {
+          get().logout();
+          return false;
+        }
       },
     }),
     {

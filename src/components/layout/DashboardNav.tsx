@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { LogOut, User,FileText, Users, Search } from 'lucide-react';
+import { useEffect } from 'react';
 
 interface NavItem {
   label: string;
@@ -24,6 +25,15 @@ const DashboardNav = () => {
   const location = useLocation();
   const { user, logout } = useAuthStore();
 
+  const token = localStorage.getItem('accessToken');
+
+  useEffect(() => {
+    if (!token && user) {
+      logout();
+      navigate('/login');
+    }
+  }, [token, user, logout, navigate]);
+
   const navItems = user?.role === 'POSTULANTE' ? postulanteNav : empresaNav;
   const isPostulante = user?.role === 'POSTULANTE';
 
@@ -38,49 +48,50 @@ const DashboardNav = () => {
   };
 
   return (
-    <header className="bg-cream-100 backdrop-blur-md sticky top-0 z-50 shadow-[0px_20px_40px_rgba(32,27,15,0.06)]">
-      <nav className="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
-        {/* Izquierda: Logo + Links */}
-        <div className="flex items-center gap-12">
-          <button
-            onClick={() => navigate('/')}
-            className="text-2xl font-bold text-teal tracking-tight font-sans hover:opacity-80 transition-opacity"
-          >
-            Suma
-          </button>
+    <header className="bg-cream-50/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm border-b border-cream-100">
+      <nav className="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
 
-          <div className="hidden md:flex items-center gap-8 font-sans font-medium text-lg">
+        {/* IZQUIERDA */}
+        <button onClick={() => navigate('/')} className="shrink-0">
+          <img
+            src="/img/logo.png"
+            alt="Suma"
+            className="h-10 w-auto object-contain"
+          />
+        </button>
+        <div className="hidden md:flex items-center gap-6">
             {navItems.map((item) => (
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`transition-colors duration-200 ${
+                className={`font-sans font-medium text-base transition-colors ${
                   isActive(item.path)
                     ? 'text-teal border-b-2 border-teal pb-1'
-                    : 'text-brown/60 hover:text-teal'
+                    : 'text-brown hover:text-teal'
                 }`}
               >
                 {item.label}
               </button>
             ))}
           </div>
-        </div>
 
-        {/* Derecha: Search + Avatar */}
-        <div className="flex items-center gap-4">
+        {/* DERECHA */}
+        <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate(isPostulante ? '/postulante/empleos' : '/empresa/vacantes')}
-            className="p-2 rounded-full hover:bg-cream-100 transition-transform active:scale-95 text-teal"
-            title="Buscar"
+            onClick={() =>
+              navigate(
+                isPostulante
+                  ? '/postulante/empleos'
+                  : '/empresa/vacantes'
+              )
+            }
+            className="p-2 rounded-full hover:bg-cream-100 transition"
           >
-            <Search className="w-5 h-5"/>
+            <Search className="w-5 h-5 text-teal" />
           </button>
 
           <div className="relative group">
-            <button
-              onClick={() => navigate(isPostulante ? '/postulante/perfil' : '/empresa/perfil')}
-              className="w-10 h-10 rounded-full object-cover border-2 border-teal overflow-hidden flex items-center justify-center bg-teal-50 text-teal font-bold text-sm"
-            >
+            <button className="w-10 h-10 rounded-full border-2 border-teal bg-teal-50 flex items-center justify-center text-teal font-bold">
               {user?.email?.charAt(0).toUpperCase() || 'U'}
             </button>
 
