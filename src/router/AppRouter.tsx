@@ -1,6 +1,9 @@
+// src/router/AppRouter.tsx
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import type { ReactNode } from 'react';
+import { useEffect, useRef } from 'react';
 
 // Páginas públicas
 import LoginPage from '../pages/auth/LoginPage';
@@ -9,14 +12,55 @@ import HomePage from '../pages/public/HomePage';
 
 // Páginas postulante
 import EmpleosPage from '../pages/postulante/EmpleosPage';
-// import PostulacionesPage from '../pages/postulante/PostulacionesPage';
-// import PerfilPage from '../pages/postulante/PerfilPage';
+import PostulacionesPage from '../pages/postulante/PostulacionesPage';
+import PerfilPage from '../pages/postulante/PerfilPage';
 import DetalleEmpleoPage from '../pages/postulante/DetalleEmpleoPage';
 
 import EmpresaDashboard from '../pages/empresa/EmpresaDashboard';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 
-// Componente para proteger rutas
+// ============================================
+// COMPONENTE DE CARGA
+// ============================================
+const LoadingScreen = () => (
+  <div className="flex items-center justify-center h-screen bg-[#FAEEDA]">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal" />
+  </div>
+);
+
+// ============================================
+// AUTH LOADER
+// ============================================
+const AuthLoader = ({ children }: { children: ReactNode }) => {
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const checkAuth = useAuthStore((s) => s.checkAuth);
+  const hasChecked = useRef(false);
+
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (hasChecked.current) return;
+
+    hasChecked.current = true;
+
+    // Solo llama checkAuth si hay token guardado (para validar que sigue vigente)
+    if (accessToken) {
+      checkAuth();
+    }
+    // Si no hay token, no hay nada que verificar — ya está isAuthenticated: false
+  }, [hasHydrated]); // ← solo depende de hasHydrated, sin checkAuth ni accessToken
+
+  if (!hasHydrated) {
+    return <LoadingScreen />;
+  }
+
+  return <>{children}</>;
+};
+
+// ============================================
+// PROTECTED ROUTE
+// ============================================
 const ProtectedRoute = ({ 
   children, 
   allowedRoles 
@@ -24,11 +68,13 @@ const ProtectedRoute = ({
   children: ReactNode; 
   allowedRoles: string[] 
 }) => {
-  const { user, logout } = useAuthStore();
-  const token = localStorage.getItem('accessToken');
+  const { user, isAuthenticated, isLoading } = useAuthStore();
   
-  if (!token || !user) {
-    logout();
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+  
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
   
@@ -53,57 +99,67 @@ const RoleRedirect = () => {
 const AppRouter = () => {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Landing - accesible para todos */}
-        <Route path="/" element={<HomePage />} />
-        {/* Públicas */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/registro" element={<RegisterPage />} />
-        
-        {/* Postulante */}
-        <Route 
-          path="/postulante/*" 
-          element={
-            <ProtectedRoute allowedRoles={['POSTULANTE']}>
-              <EmpleosPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route
-          path="/postulante/empleos/:id"
-          element={
-            <ProtectedRoute allowedRoles={['POSTULANTE']}>
-              <DetalleEmpleoPage />
-            </ProtectedRoute>
-          }
-        />
-        
-        {/* Empresa */}
-        <Route 
-          path="/empresa/*" 
-          element={
-            <ProtectedRoute allowedRoles={['EMPRESA']}>
-              <EmpresaDashboard />
-            </ProtectedRoute>
-          } 
-        />
-        
-        {/* Admin */}
-        <Route 
-          path="/admin/*" 
-          element={
-            <ProtectedRoute allowedRoles={['SUPERADMIN']}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } 
-        />
+      <AuthLoader>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/registro" element={<RegisterPage />} />
+          
+          <Route 
+            path="/postulante/*" 
+            element={
+              <ProtectedRoute allowedRoles={['POSTULANTE']}>
+                <EmpleosPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route
+            path="/postulante/empleos/:id"
+            element={
+              <ProtectedRoute allowedRoles={['POSTULANTE']}>
+                <DetalleEmpleoPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/postulante/postulaciones"
+            element={
+              <ProtectedRoute allowedRoles={['POSTULANTE']}>
+                <PostulacionesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/postulante/perfil"
+            element={
+              <ProtectedRoute allowedRoles={['POSTULANTE']}>
+                <PerfilPage />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route 
+            path="/empresa/*" 
+            element={
+              <ProtectedRoute allowedRoles={['EMPRESA']}>
+                <EmpresaDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/admin/*" 
+            element={
+              <ProtectedRoute allowedRoles={['SUPERADMIN']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
 
-        {/* Redirect inteligente */}
-        <Route path="/dashboard" element={<RoleRedirect />} />
-        
-        {/* Redirect por defecto */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          <Route path="/dashboard" element={<RoleRedirect />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthLoader>
     </BrowserRouter>
   );
 };

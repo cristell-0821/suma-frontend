@@ -78,7 +78,7 @@ const DetalleEmpleoPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="pt-4 pb-20 md:pb-0">
+      <div className="pb-20 md:pb-0">
         {/* Mensajes */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-6 flex items-center justify-between">

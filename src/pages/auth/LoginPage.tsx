@@ -16,24 +16,24 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
+      console.log('🔐 Iniciando login...');
       const response = await authService.login({ email, password });
+      console.log('✅ Login exitoso:', response.user.role);
       
+      console.log('📝 Guardando en store...');
       setAuth(response.user, response.accessToken, response.refreshToken);
+      console.log('✅ Store actualizado');
       
+      console.log('🚀 Navegando a ruta...');
       switch (response.user.role) {
         case 'POSTULANTE':
           navigate('/postulante');
           break;
-        case 'EMPRESA':
-          navigate('/empresa');
-          break;
-        case 'SUPERADMIN':
-          navigate('/admin');
-          break;
-        default:
-          navigate('/');
+        // ... etc
       }
+      console.log('✅ Navegación llamada');
     } catch (err: any) {
+      console.error('❌ Error en login:', err);
       setError(err.response?.data?.message || 'Error al iniciar sesión');
     } finally {
       setLoading(false);

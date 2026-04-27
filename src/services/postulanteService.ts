@@ -1,4 +1,6 @@
 import api from '../lib/axios';
+//import type { ProfileFormData } from '../components/postulante/perfil/ProfileEditModal';
+import type { ProfileUpdatePayload } from '../components/postulante/perfil/ProfileEditModal';
 
 export const postulanteService = {
   // Obtener mi perfil
@@ -8,9 +10,9 @@ export const postulanteService = {
   },
 
   // Actualizar perfil
-  updateProfile: async (data: any) => {
-    const response = await api.put('/postulantes/perfil', data);
-    return response.data;
+   async updateProfile(formData: ProfileUpdatePayload) {
+    const { data } = await api.put('/postulantes/perfil', formData);
+    return data;
   },
 
   // Ver ofertas de trabajo (con filtros mejorados)

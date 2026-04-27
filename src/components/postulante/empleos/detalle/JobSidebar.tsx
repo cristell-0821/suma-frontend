@@ -73,9 +73,14 @@ const JobSidebar = ({ offer }: Props) => {
         <p className="text-sm opacity-90 mb-4">
           Si tienes dudas sobre este puesto o necesitas ajustes en el proceso de postulación, contáctanos.
         </p>
-        <button className="inline-flex items-center gap-2 font-bold text-sm hover:gap-3 transition-all">
+        <a
+          href="https://wa.me/51977972282"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 font-bold text-sm hover:gap-3 transition-all"
+        >
           Contactar soporte <Heart className="w-4 h-4" />
-        </button>
+        </a>
       </div>
     </aside>
   );

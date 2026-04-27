@@ -13,18 +13,14 @@ interface NavLink {
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuthStore();
 
-  const token = localStorage.getItem('accessToken');
-  const isLoggedIn = !!token && !!user;
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  const logout = useAuthStore((s) => s.logout);
 
-  // Validar token
-  useEffect(() => {
-    if (!token && user) {
-      logout();
-      navigate('/login');
-    }
-  }, [token, user, logout, navigate]);
+  // ← Ya no uses localStorage aquí para nada
+  const isLoggedIn = isAuthenticated && !!user;
 
   // Determinar links según rol y auth
   const getLinks = (): NavLink[] => {
@@ -78,8 +74,27 @@ const Navbar = () => {
       navigate('/');
     }
   };
-
+  // En el return, antes del JSX principal:
+  if (!hasHydrated) {
+    return (
+      <header className="bg-cream-50/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm border-b border-cream-100">
+        <nav className="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
+          <button onClick={() => navigate('/')}>
+            <img src="/img/logo.png" alt="Suma" className="h-10 w-auto object-contain" />
+          </button>
+          {/* Skeleton mientras hidrata */}
+          <div className="hidden md:flex items-center gap-2">
+            {[1,2,3].map(i => (
+              <div key={i} className="h-8 w-24 bg-cream-100 rounded-xl animate-pulse" />
+            ))}
+          </div>
+          <div className="w-10 h-10 rounded-full bg-cream-100 animate-pulse" />
+        </nav>
+      </header>
+    );
+  }
   return (
+    
     <header className="bg-cream-50/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm border-b border-cream-100">
       <nav className="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
         {/* Logo */}
