@@ -93,7 +93,15 @@ const PerfilPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <ProfileInfo profile={profile} />
-          <ProfileSidebar profile={profile} />
+          <ProfileSidebar
+            profile={profile}
+            onProfileUpdate={(updates) => {
+              setProfile((prev) => {
+                if (!prev) return null;
+                return { ...prev, ...updates };
+              });
+            }}
+          />
         </div>
       </div>
 

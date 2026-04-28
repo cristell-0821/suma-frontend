@@ -2,7 +2,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { Search, LogOut, User, FileText, Users, Briefcase, Building2, Home, Sparkles } from 'lucide-react';
-import { useEffect } from 'react';
 
 interface NavLink {
   label: string;
