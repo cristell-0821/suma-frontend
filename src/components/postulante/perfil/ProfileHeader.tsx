@@ -1,21 +1,30 @@
+import { useState } from 'react';
 import { User, MapPin, Pencil, Briefcase } from 'lucide-react';
 import type { PostulanteProfile } from '../empleos/types';
 
 interface Props {
   profile: PostulanteProfile;
   onEdit: () => void;
+  onPhotoClick?: () => void;
 }
 
-const ProfileHeader = ({ profile, onEdit }: Props) => {
+const ProfileHeader = ({ profile, onEdit, onPhotoClick }: Props) => {
   const fullName = `${profile.nombres || ''} ${profile.apellidos || ''}`.trim() || 'Postulante';
+  const [isHoveringPhoto, setIsHoveringPhoto] = useState(false);
 
   return (
     <section className="mb-10 relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal to-teal-600 p-8 md:p-12 text-white">
       <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
       
       <div className="relative z-10 flex flex-col md:flex-row items-center md:items-end gap-6">
-        {/* Avatar con foto de perfil */}
-        <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden bg-white/20 backdrop-blur border-2 border-white/30 flex items-center justify-center shrink-0">
+        {/* Avatar con foto de perfil — AHORA CLICKEABLE */}
+        <button
+          type="button"
+          onClick={onPhotoClick}
+          onMouseEnter={() => setIsHoveringPhoto(true)}
+          onMouseLeave={() => setIsHoveringPhoto(false)}
+          className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden bg-white/20 backdrop-blur border-2 border-white/30 flex items-center justify-center shrink-0 cursor-pointer group transition-transform hover:scale-105"
+        >
           {profile.fotoPerfil ? (
             <img
               src={profile.fotoPerfil}
@@ -25,7 +34,16 @@ const ProfileHeader = ({ profile, onEdit }: Props) => {
           ) : (
             <User className="w-12 h-12 md:w-16 md:h-16 text-white/80" />
           )}
-        </div>
+
+          {/* Overlay con lápiz al hacer hover */}
+          <div
+            className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${
+              isHoveringPhoto ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <Pencil className="w-6 h-6 md:w-8 md:h-8 text-white" />
+          </div>
+        </button>
 
         {/* Info */}
         <div className="flex-1 text-center md:text-left">

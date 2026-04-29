@@ -9,6 +9,7 @@ import ProfileEditModal, { type ProfileUpdatePayload } from '../../components/po
 import { postulanteService } from '../../services/postulanteService';
 import { disabilitiesService } from '../../services/disabilitiesService';
 import type { PostulanteProfile, Disability } from '../../components/postulante/empleos/types';
+import ProfilePhotoModal from '../../components/postulante/perfil/ProfilePhotoModal';
 
 const PerfilPage = () => {
   const [profile, setProfile] = useState<PostulanteProfile | null>(null);
@@ -17,6 +18,7 @@ const PerfilPage = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -45,13 +47,8 @@ const PerfilPage = () => {
     }
   };
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleCloseEdit = () => {
-    setIsEditing(false);
-  };
+  const handleEdit = () => setIsEditing(true);
+  const handleCloseEdit = () => setIsEditing(false);
 
   const handleSave = async (formData: ProfileUpdatePayload) => {
     setSaving(true);
@@ -59,10 +56,52 @@ const PerfilPage = () => {
       await postulanteService.updateProfile(formData);
       await loadProfile();
       setIsEditing(false);
-    } catch (err) {
+    } catch {
       setError('Error al guardar los cambios');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleCVUpload = (cvUrl: string) => {
+    setProfile((prev) => {
+      if (!prev) return null;
+      return { ...prev, cvUrl };
+    });
+  };
+
+  const handleFotoUpload = (fotoUrl: string) => {
+    setProfile((prev) => {
+      if (!prev) return null;
+      return { ...prev, fotoPerfil: fotoUrl };
+    });
+  };
+
+  const handlePhotoUpdate = async (fotoUrl: string | null) => {
+    if (!profile) return;
+    
+    try {
+      await postulanteService.updateProfile({
+        // Enviamos los datos mínimos + la foto
+        nombres: profile.nombres,
+        apellidos: profile.apellidos,
+        telefono: profile.telefono || '',
+        ciudad: profile.ciudad || '',
+        fechaNacimiento: profile.fechaNacimiento || '',
+        sobreMi: profile.sobreMi || '',
+        skills: profile.skills || [],
+        salarioEsperado: profile.salarioEsperado ?? null,
+        linkedin: profile.linkedin || '',
+        portfolio: profile.portfolio || '',
+        fotoPerfil: fotoUrl || '',
+        modalidadPreferida: profile.modalidadPreferida || '',
+        sectorPreferido: profile.sectorPreferido || '',
+        ciudadPreferida: profile.ciudadPreferida || '',
+        disabilityIds: profile.disabilities?.map(d => d.id) || [],
+      });
+      await loadProfile();
+    } catch {
+      setError('Error al actualizar la foto');
     }
   };
 
@@ -89,7 +128,11 @@ const PerfilPage = () => {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        <ProfileHeader profile={profile} onEdit={handleEdit} />
+        <ProfileHeader
+          profile={profile}
+          onEdit={handleEdit}
+          onPhotoClick={() => setIsPhotoModalOpen(true)}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <ProfileInfo profile={profile} />
@@ -112,7 +155,16 @@ const PerfilPage = () => {
         isOpen={isEditing}
         onClose={handleCloseEdit}
         onSave={handleSave}
+        onCVUpload={handleCVUpload}
+        onFotoUpload={handleFotoUpload}
         isSaving={saving}
+      />
+      {/* Modal editar fotos */}
+      <ProfilePhotoModal
+        isOpen={isPhotoModalOpen}
+        onClose={() => setIsPhotoModalOpen(false)}
+        currentPhotoUrl={profile.fotoPerfil}
+        onPhotoUpdate={handlePhotoUpdate}
       />
     </DashboardLayout>
   );

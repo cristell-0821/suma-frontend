@@ -1,8 +1,8 @@
-// src/components/postulante/perfil/ProfileEditModal.tsx
-
 import { useState, useEffect } from 'react';
-import { X, Briefcase, Globe, DollarSign, FileText } from 'lucide-react';
+import { X, Globe, DollarSign, FileText, Upload, Loader2 } from 'lucide-react';
+import { useCVUpload } from '../../../hooks/useCVUpload';
 import type { PostulanteProfile, Disability } from '../empleos/types';
+import { useFotoPerfilUpload } from '../../../hooks/useFotoPerfilUpload';
 
 // ============================================
 // INTERFAZ PARA EL FORMULARIO INTERNO
@@ -15,10 +15,9 @@ export interface ProfileFormData {
   fechaNacimiento: string;
   sobreMi: string;
   skills: string[];
-  salarioEsperado: number | string;  // Permite string vacío mientras escribe
+  salarioEsperado: number | string;
   linkedin: string;
   portfolio: string;
-  cvUrl: string;
   fotoPerfil: string;
   modalidadPreferida: string;
   sectorPreferido: string;
@@ -37,10 +36,9 @@ export interface ProfileUpdatePayload {
   fechaNacimiento: string;
   sobreMi: string;
   skills: string[];
-  salarioEsperado: number | null;  // Backend espera null para vacío
+  salarioEsperado: number | null;
   linkedin: string;
   portfolio: string;
-  cvUrl: string;
   fotoPerfil: string;
   modalidadPreferida: string;
   sectorPreferido: string;
@@ -56,14 +54,16 @@ interface Props {
   allDisabilities: Disability[];
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: ProfileUpdatePayload) => void;  // ← Usa ProfileUpdatePayload
+  onSave: (data: ProfileUpdatePayload) => void;
+  onCVUpload?: (cvUrl: string) => void;
+  onFotoUpload?: (fotoUrl: string) => void;
   isSaving?: boolean;
 }
 
 const MODALIDADES = ['REMOTO', 'HIBRIDO', 'PRESENCIAL'];
 const SECTORES = ['Tecnología', 'Administración', 'Ventas', 'Marketing', 'Educación', 'Salud', 'Manufactura', 'Servicios', 'Otro'];
 
-const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, isSaving }: Props) => {
+const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, onCVUpload, onFotoUpload, isSaving }: Props) => {
   const [formData, setFormData] = useState<ProfileFormData>({
     nombres: '',
     apellidos: '',
@@ -75,7 +75,6 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, i
     salarioEsperado: '',
     linkedin: '',
     portfolio: '',
-    cvUrl: '',
     fotoPerfil: '',
     modalidadPreferida: '',
     sectorPreferido: '',
@@ -84,6 +83,15 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, i
   });
 
   const [skillInput, setSkillInput] = useState('');
+
+  const {
+    fileInputRef,
+    isUploading: isUploadingCV,
+    uploadError: cvUploadError,
+    openFilePicker,
+    handleFileChange,
+    clearError: clearCVError,
+  } = useCVUpload();
 
   useEffect(() => {
     if (isOpen && profile) {
@@ -98,15 +106,26 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, i
         salarioEsperado: profile.salarioEsperado ?? '',
         linkedin: profile.linkedin || '',
         portfolio: profile.portfolio || '',
-        cvUrl: profile.cvUrl || '',
         fotoPerfil: profile.fotoPerfil || '',
         modalidadPreferida: profile.modalidadPreferida || '',
         sectorPreferido: profile.sectorPreferido || '',
         ciudadPreferida: profile.ciudadPreferida || '',
         disabilityIds: profile.disabilities?.map(d => d.id) || [],
       });
+      clearCVError();
     }
-  }, [isOpen, profile]);
+  }, [isOpen, profile, clearCVError]);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -133,9 +152,13 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, i
     handleChange('disabilityIds', newIds);
   };
 
-  // ============================================
-  // HANDLE SUBMIT — CONVERSIÓN A PAYLOAD
-  // ============================================
+  const handleCVFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = await handleFileChange(e);
+    if (url && onCVUpload) {
+      onCVUpload(url);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -144,13 +167,14 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, i
       apellidos: formData.apellidos.trim(),
       telefono: formData.telefono.trim(),
       ciudad: formData.ciudad.trim(),
-      fechaNacimiento: formData.fechaNacimiento,
+      fechaNacimiento: formData.fechaNacimiento
+      ? new Date(formData.fechaNacimiento).toISOString()
+      : '',
       sobreMi: formData.sobreMi.trim(),
       skills: formData.skills,
       salarioEsperado: formData.salarioEsperado === '' ? null : Number(formData.salarioEsperado),
       linkedin: formData.linkedin.trim(),
       portfolio: formData.portfolio.trim(),
-      cvUrl: formData.cvUrl.trim(),
       fotoPerfil: formData.fotoPerfil.trim(),
       modalidadPreferida: formData.modalidadPreferida,
       sectorPreferido: formData.sectorPreferido.trim(),
@@ -233,16 +257,52 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, i
                   placeholder="Lima"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-brown mb-1.5">Foto de perfil (URL)</label>
+              {/* <div>
+                {(formData.fotoPerfil || profile.fotoPerfil) && (
+                  <div className="mb-3 flex items-center gap-3">
+                    <img
+                      src={formData.fotoPerfil || profile.fotoPerfil}
+                      alt="Preview"
+                      className="w-12 h-12 rounded-full object-cover border border-cream-200"
+                    />
+                    <span className="text-xs text-brown/50">Vista previa</span>
+                  </div>
+                )}
+                <label className="block text-sm font-medium text-brown mb-1.5">Foto de perfil</label>
                 <input
-                  type="url"
-                  value={formData.fotoPerfil}
-                  onChange={e => handleChange('fotoPerfil', e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-cream-200 bg-cream-50 text-brown focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal transition-all"
-                  placeholder="https://..."
+                  ref={fotoInputRef}
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.webp"
+                  onChange={handleFotoFileChange}
+                  className="hidden"
                 />
-              </div>
+                <button
+                  type="button"
+                  onClick={openFotoPicker}
+                  disabled={isUploadingFoto}
+                  className="w-full flex items-center gap-2 px-4 py-2.5 h-[46px] rounded-xl border border-cream-200 bg-cream-50 text-brown hover:bg-teal-50 hover:border-teal/30 transition-all text-left"
+                >
+                  <div className="w-8 h-8 bg-teal/10 rounded-lg flex items-center justify-center shrink-0">
+                    {isUploadingFoto ? (
+                      <Loader2 className="w-4 h-4 text-teal animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4 text-teal" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-brown">
+                      {isUploadingFoto
+                        ? 'Subiendo foto...'
+                        : profile.fotoPerfil
+                        ? 'Reemplazar foto'
+                        : 'Subir foto de perfil'}
+                    </p>
+                  </div>
+                </button>
+                {fotoUploadError && (
+                  <p className="text-xs text-red-500 mt-1.5">{fotoUploadError}</p>
+                )}
+              </div> */}
             </div>
           </section>
 
@@ -264,7 +324,8 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, i
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-brown mb-1.5 flex items-center gap-1.5">
-                  <Briefcase className="w-4 h-4 text-[#0077B5]" /> LinkedIn
+                  <img src="/icons/linkedin.svg" alt="LinkedIn" className="w-4 h-4" />
+                  LinkedIn
                 </label>
                 <input
                   type="url"
@@ -302,17 +363,47 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, i
                   min={0}
                 />
               </div>
+              {/* CV — Reemplazar desde el modal */}
               <div>
                 <label className="block text-sm font-medium text-brown mb-1.5 flex items-center gap-1.5">
-                  <FileText className="w-4 h-4 text-teal" /> URL del CV
+                  <FileText className="w-4 h-4 text-teal" /> Currículum
                 </label>
                 <input
-                  type="url"
-                  value={formData.cvUrl}
-                  onChange={e => handleChange('cvUrl', e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-cream-200 bg-cream-50 text-brown focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal transition-all"
-                  placeholder="https://storage.suma.pe/cvs/..."
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp"
+                  onChange={handleCVFileChange}
+                  className="hidden"
                 />
+                <button
+                  type="button"
+                  onClick={openFilePicker}
+                  disabled={isUploadingCV}
+                  className="w-full flex items-center gap-2 px-4 py-2.5 h-[46px] rounded-xl border border-cream-200 bg-cream-50 text-brown hover:bg-teal-50 hover:border-teal/30 transition-all text-left"
+                >
+                  <div className="w-8 h-8 bg-teal/10 rounded-lg flex items-center justify-center shrink-0">
+                    {isUploadingCV ? (
+                      <Loader2 className="w-4 h-4 text-teal animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4 text-teal" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-brown">
+                      {isUploadingCV
+                        ? 'Subiendo nuevo CV...'
+                        : profile.cvUrl
+                        ? 'Reemplazar currículum'
+                        : 'Subir currículum'}
+                    </p>
+                    {/* <p className="text-xs text-brown/50">
+                      {profile.cvUrl ? 'Ya tienes un CV subido' : 'PDF, JPG, PNG o WEBP (máx. 5MB)'}
+                    </p> */}
+                  </div>
+                </button>
+                {cvUploadError && (
+                  <p className="text-xs text-red-500 mt-1.5">{cvUploadError}</p>
+                )}
               </div>
             </div>
           </section>
@@ -429,13 +520,13 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, i
               type="button"
               onClick={onClose}
               className="flex-1 px-6 py-3 rounded-xl border border-cream-200 text-brown font-medium hover:bg-cream-50 transition-colors"
-              disabled={isSaving}
+              disabled={isSaving || isUploadingCV }
             >
               Cancelar
             </button>
             <button
               type="submit"
-              disabled={isSaving}
+              disabled={isSaving || isUploadingCV }
               className="flex-1 px-6 py-3 rounded-xl bg-teal text-white font-bold hover:bg-teal-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isSaving ? (
