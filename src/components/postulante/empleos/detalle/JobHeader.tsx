@@ -79,7 +79,7 @@ const JobHeader = ({ offer, onApply, onSave, isSaved }: Props) => {
           >
             Postular ahora
           </button>
-          <button
+          {/* <button
             onClick={onSave}
             className={`flex items-center justify-center gap-2 border-2 px-8 py-3 rounded-xl font-semibold transition-all ${
               isSaved
@@ -88,7 +88,7 @@ const JobHeader = ({ offer, onApply, onSave, isSaved }: Props) => {
             }`}
           >
             {isSaved ? 'Guardado' : 'Guardar vacante'}
-          </button>
+          </button> */}
         </div>
       </div>
     </header>

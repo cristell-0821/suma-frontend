@@ -156,8 +156,17 @@ const Navbar = () => {
 
               {/* Avatar + Dropdown */}
               <div className="relative group">
-                <button className="w-10 h-10 rounded-full border-2 border-teal bg-teal-50 flex items-center justify-center text-teal font-bold text-sm hover:bg-teal-100 transition-colors">
-                  {user?.email?.charAt(0).toUpperCase() || 'U'}
+                {/* Avatar */}
+                <button className="w-10 h-10 rounded-full border-2 border-teal overflow-hidden bg-teal-50 flex items-center justify-center text-teal font-bold text-sm hover:bg-teal-100 transition-colors">
+                  {user?.fotoPerfil ? (
+                    <img
+                      src={user.fotoPerfil}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    user?.email?.charAt(0).toUpperCase() || 'U'
+                  )}
                 </button>
 
                 {/* Dropdown */}

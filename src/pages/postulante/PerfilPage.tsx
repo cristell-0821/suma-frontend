@@ -10,6 +10,7 @@ import { postulanteService } from '../../services/postulanteService';
 import { disabilitiesService } from '../../services/disabilitiesService';
 import type { PostulanteProfile, Disability } from '../../components/postulante/empleos/types';
 import ProfilePhotoModal from '../../components/postulante/perfil/ProfilePhotoModal';
+import { useAuthStore } from '../../stores/authStore';
 
 const PerfilPage = () => {
   const [profile, setProfile] = useState<PostulanteProfile | null>(null);
@@ -19,6 +20,7 @@ const PerfilPage = () => {
   const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+  const updateUserPhoto = useAuthStore((s) => s.updateUserPhoto);
 
   useEffect(() => {
     loadProfile();
@@ -30,6 +32,9 @@ const PerfilPage = () => {
     try {
       const data = await postulanteService.getProfile();
       setProfile(data);
+      if (data.fotoPerfil) {
+        updateUserPhoto(data.fotoPerfil);
+      }
       setError('');
     } catch {
       setError('Error al cargar tu perfil');
@@ -54,7 +59,7 @@ const PerfilPage = () => {
     setSaving(true);
     try {
       await postulanteService.updateProfile(formData);
-      await loadProfile();
+      await loadProfile(); // ← loadProfile ya sincroniza la foto al store
       setIsEditing(false);
     } catch {
       setError('Error al guardar los cambios');
@@ -82,7 +87,6 @@ const PerfilPage = () => {
     
     try {
       await postulanteService.updateProfile({
-        // Enviamos los datos mínimos + la foto
         nombres: profile.nombres,
         apellidos: profile.apellidos,
         telefono: profile.telefono || '',
@@ -99,7 +103,7 @@ const PerfilPage = () => {
         ciudadPreferida: profile.ciudadPreferida || '',
         disabilityIds: profile.disabilities?.map(d => d.id) || [],
       });
-      await loadProfile();
+      await loadProfile(); // ← loadProfile ya sincroniza la foto al store
     } catch {
       setError('Error al actualizar la foto');
     }
@@ -148,7 +152,7 @@ const PerfilPage = () => {
         </div>
       </div>
 
-      {/* Modal de edición */}
+      {/* Modal de edición de datos */}
       <ProfileEditModal
         profile={profile}
         allDisabilities={allDisabilities}
@@ -159,7 +163,8 @@ const PerfilPage = () => {
         onFotoUpload={handleFotoUpload}
         isSaving={saving}
       />
-      {/* Modal editar fotos */}
+
+      {/* Modal de foto de perfil */}
       <ProfilePhotoModal
         isOpen={isPhotoModalOpen}
         onClose={() => setIsPhotoModalOpen(false)}

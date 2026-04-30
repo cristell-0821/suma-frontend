@@ -8,6 +8,7 @@ export interface User {
   id: string;
   email: string;
   role: UserRole;
+  fotoPerfil?: string;  // ← NUEVO
 }
 
 interface AuthState {
@@ -22,6 +23,7 @@ interface AuthState {
   logout: () => void;
   checkAuth: () => Promise<boolean>;
   setHasHydrated: (value: boolean) => void;
+  updateUserPhoto: (fotoPerfil: string | undefined) => void; 
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -31,7 +33,7 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
-      isLoading: false,    // ← CAMBIO: empieza en false, AuthLoader lo maneja
+      isLoading: false,
       hasHydrated: false,
 
       setAuth: (user, accessToken, refreshToken) => {
@@ -90,6 +92,14 @@ export const useAuthStore = create<AuthState>()(
       setHasHydrated: (value: boolean) => {
         set({ hasHydrated: value });
       },
+
+      // ← AQUÍ VA: justo después de setHasHydrated, antes del cierre del objeto
+      updateUserPhoto: (fotoPerfil) => {
+        const current = get().user;
+        if (current) {
+          set({ user: { ...current, fotoPerfil } });
+        }
+      },
     }),
     {
       name: 'suma-auth',
@@ -100,11 +110,9 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => {
-        // state puede ser undefined si el storage estaba vacío
         if (state) {
           state.setHasHydrated(true);
         } else {
-          // ← CRÍTICO: si no hay nada en storage, igual hay que hidratar
           useAuthStore.getState().setHasHydrated(true);
         }
       },
