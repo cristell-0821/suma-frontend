@@ -90,7 +90,7 @@ const PerfilPage = () => {
         nombres: profile.nombres,
         apellidos: profile.apellidos,
         telefono: profile.telefono || '',
-        ciudad: profile.ciudad || '',
+        ciudadId: profile.ciudad?.id || '',
         fechaNacimiento: profile.fechaNacimiento || '',
         sobreMi: profile.sobreMi || '',
         skills: profile.skills || [],
@@ -99,8 +99,8 @@ const PerfilPage = () => {
         portfolio: profile.portfolio || '',
         fotoPerfil: fotoUrl || '',
         modalidadPreferida: profile.modalidadPreferida || '',
-        sectorPreferido: profile.sectorPreferido || '',
-        ciudadPreferida: profile.ciudadPreferida || '',
+        sectorId: profile.sector?.id || '',
+        ciudadPreferidaId: profile.ciudadPreferida?.id || '',
         disabilityIds: profile.disabilities?.map(d => d.id) || [],
       });
       await loadProfile(); // ← loadProfile ya sincroniza la foto al store

@@ -8,7 +8,8 @@ export interface User {
   id: string;
   email: string;
   role: UserRole;
-  fotoPerfil?: string;  // ← NUEVO
+  fotoPerfil?: string;
+  logoUrl?: string;
 }
 
 interface AuthState {
@@ -24,6 +25,7 @@ interface AuthState {
   checkAuth: () => Promise<boolean>;
   setHasHydrated: (value: boolean) => void;
   updateUserPhoto: (fotoPerfil: string | undefined) => void; 
+  updateUserLogo: (logoUrl: string | undefined) => void; 
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -98,6 +100,12 @@ export const useAuthStore = create<AuthState>()(
         const current = get().user;
         if (current) {
           set({ user: { ...current, fotoPerfil } });
+        }
+      },
+      updateUserLogo: (logoUrl) => {
+        const current = get().user;
+        if (current) {
+          set({ user: { ...current, logoUrl } });
         }
       },
     }),

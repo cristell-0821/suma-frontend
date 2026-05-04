@@ -18,6 +18,11 @@ const JobSidebar = ({ offer }: Props) => {
     }
   };
 
+  // ✅ Extraer string ANTES de JSX
+  const sectorNombre = typeof offer.sector === 'string'
+    ? offer.sector
+    : offer.sector?.nombre || 'Sector no especificado';
+
   return (
     <aside className="space-y-6">
       {/* Info Empresa */}
@@ -35,7 +40,7 @@ const JobSidebar = ({ offer }: Props) => {
           )}
           <div className="flex items-center gap-3 text-sm">
             <Globe className="w-4 h-4 text-coral" />
-            <span className="text-brown/70">{offer.sector || 'Sector no especificado'}</span>
+            <span className="text-brown/70">{sectorNombre}</span>
           </div>
         </div>
       </div>

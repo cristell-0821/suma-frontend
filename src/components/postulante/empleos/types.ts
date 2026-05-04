@@ -6,22 +6,38 @@ export interface Disability {
 export interface Empresa {
   id: string;
   razonSocial: string;
-  ruc?: string;  
+  ruc?: string;
   isVerified: boolean;
   logo?: string;
+}
+
+export interface Sector {
+  id: string;
+  nombre: string;
+}
+
+export interface Ciudad {
+  id: string;
+  nombre: string;
+  departamento?: {
+    id: string;
+    nombre: string;
+  };
 }
 
 export interface JobOffer {
   id: string;
   titulo: string;
   descripcion: string;
-  funciones?: string | string[];  
+  funciones?: string | string[];
   requisitos?: string | string[];
   empresa: Empresa;
   modalidad: 'REMOTO' | 'HIBRIDO' | 'PRESENCIAL';
   tipoJornada: string;
-  sector?: string;
-  ciudad: string;
+  sectorId?: string;
+  sector?: Sector;
+  ciudadId?: string;
+  ciudad?: Ciudad;
   salarioMin?: number;
   salarioMax?: number;
   disabilities: Disability[];
@@ -59,17 +75,20 @@ export interface PostulanteProfile {
   nombres: string;
   apellidos: string;
   telefono?: string;
-  ciudad?: string;
+  ciudadId?: string;
+  ciudad?: Ciudad;
   modalidadPreferida?: string;
-  sectorPreferido?: string; 
-  ciudadPreferida?: string;
+  sectorId?: string;
+  sector?: Sector;
+  ciudadPreferidaId?: string;
+  ciudadPreferida?: Ciudad;
   sobreMi?: string;
   skills?: string[];
   cvUrl?: string;
   salarioEsperado?: number;
   linkedin?: string;
   portfolio?: string;
-  fotoPerfil?: string; 
+  fotoPerfil?: string;
   fechaNacimiento?: string;
   sectorInteres?: string[];
   user: {

@@ -1,4 +1,4 @@
-import { Briefcase, Globe, House, Building2, Timer, DollarSign, ArrowRight } from 'lucide-react';
+import { Briefcase, Globe, House, Building2, Timer, DollarSign, ArrowRight, MapPin } from 'lucide-react';
 import type { JobOffer } from './types';
 import type { LucideIcon } from 'lucide-react';
 
@@ -36,6 +36,10 @@ const JobCard = ({ offer, onApply, onViewDetail }: Props) => {
   const modality = MODALITY_CONFIG[offer.modalidad] || { icon: Briefcase, label: offer.modalidad };
   const ModalityIcon = modality.icon;
 
+  // Datos de relaciones (con fallback)
+  const ciudadNombre = offer.ciudad?.nombre || 'Ubicación no especificada';
+  const sectorNombre = offer.sector?.nombre || '';
+
   return (
     <article
       className={`bg-white p-6 md:p-8 rounded-2xl shadow-sm border-l-4 ${
@@ -62,8 +66,11 @@ const JobCard = ({ offer, onApply, onViewDetail }: Props) => {
               >
                 {offer.titulo}
               </h3>
-              <p className="text-brown/50 text-sm font-medium">
-                {offer.empresa.razonSocial} • {offer.ciudad}
+              <p className="text-brown/50 text-sm font-medium flex items-center gap-1">
+                {offer.empresa.razonSocial} 
+                <span className="text-brown/30">•</span>
+                <MapPin className="w-3 h-3" />
+                {ciudadNombre}
               </p>
             </div>
             {offer.isRecommended && (
@@ -75,6 +82,11 @@ const JobCard = ({ offer, onApply, onViewDetail }: Props) => {
 
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mt-3">
+            {sectorNombre && (
+              <span className="flex items-center gap-1 px-2.5 py-1 bg-teal-50 rounded-full text-xs font-medium text-teal border border-teal/20">
+                {sectorNombre}
+              </span>
+            )}
             <span className="flex items-center gap-1 px-2.5 py-1 bg-cream-50 rounded-full text-xs font-medium text-brown/70 border border-cream-200">
               <ModalityIcon className="w-3.5 h-3.5 text-teal" />
               {modality.label}

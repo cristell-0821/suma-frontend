@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { X, Globe, DollarSign, FileText, Upload, Loader2 } from 'lucide-react';
 import { useCVUpload } from '../../../hooks/useCVUpload';
-import type { PostulanteProfile, Disability } from '../empleos/types';
-import { useFotoPerfilUpload } from '../../../hooks/useFotoPerfilUpload';
+import type { PostulanteProfile, Disability, Sector, Ciudad } from '../empleos/types';
+import { sectorsService } from '../../../services/sectorsService';
+import { locationsService } from '../../../services/locationsService';
+import type { Departamento } from '../../../services/locationsService';
 
 // ============================================
 // INTERFAZ PARA EL FORMULARIO INTERNO
@@ -11,7 +13,8 @@ export interface ProfileFormData {
   nombres: string;
   apellidos: string;
   telefono: string;
-  ciudad: string;
+  ciudadId: string;
+  ciudadNombre: string;
   fechaNacimiento: string;
   sobreMi: string;
   skills: string[];
@@ -20,8 +23,10 @@ export interface ProfileFormData {
   portfolio: string;
   fotoPerfil: string;
   modalidadPreferida: string;
-  sectorPreferido: string;
-  ciudadPreferida: string;
+  sectorId: string;
+  sectorNombre: string;
+  ciudadPreferidaId: string;
+  ciudadPreferidaNombre: string;
   disabilityIds: string[];
 }
 
@@ -29,21 +34,21 @@ export interface ProfileFormData {
 // INTERFAZ PARA ENVIAR AL BACKEND
 // ============================================
 export interface ProfileUpdatePayload {
-  nombres: string;
-  apellidos: string;
-  telefono: string;
-  ciudad: string;
-  fechaNacimiento: string;
-  sobreMi: string;
-  skills: string[];
-  salarioEsperado: number | null;
-  linkedin: string;
-  portfolio: string;
-  fotoPerfil: string;
-  modalidadPreferida: string;
-  sectorPreferido: string;
-  ciudadPreferida: string;
-  disabilityIds: string[];
+  nombres?: string;
+  apellidos?: string;
+  telefono?: string;
+  ciudadId?: string;
+  fechaNacimiento?: string;
+  sobreMi?: string;
+  skills?: string[];
+  salarioEsperado?: number | null;
+  linkedin?: string;
+  portfolio?: string;
+  fotoPerfil?: string;
+  modalidadPreferida?: string;
+  sectorId?: string;
+  ciudadPreferidaId?: string;
+  disabilityIds?: string[];
 }
 
 // ============================================
@@ -61,14 +66,14 @@ interface Props {
 }
 
 const MODALIDADES = ['REMOTO', 'HIBRIDO', 'PRESENCIAL'];
-const SECTORES = ['Tecnología', 'Administración', 'Ventas', 'Marketing', 'Educación', 'Salud', 'Manufactura', 'Servicios', 'Otro'];
 
 const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, onCVUpload, onFotoUpload, isSaving }: Props) => {
   const [formData, setFormData] = useState<ProfileFormData>({
     nombres: '',
     apellidos: '',
     telefono: '',
-    ciudad: '',
+    ciudadId: '',
+    ciudadNombre: '',
     fechaNacimiento: '',
     sobreMi: '',
     skills: [],
@@ -77,10 +82,20 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
     portfolio: '',
     fotoPerfil: '',
     modalidadPreferida: '',
-    sectorPreferido: '',
-    ciudadPreferida: '',
+    sectorId: '',
+    sectorNombre: '',
+    ciudadPreferidaId: '',
+    ciudadPreferidaNombre: '',
     disabilityIds: [],
   });
+
+  // Datos para los selects
+  const [sectores, setSectores] = useState<Sector[]>([]);
+  const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
+  const [ciudades, setCiudades] = useState<Ciudad[]>([]);
+  const [ciudadesPreferidas, setCiudadesPreferidas] = useState<Ciudad[]>([]);
+  const [loadingSectores, setLoadingSectores] = useState(false);
+  const [loadingDepartamentos, setLoadingDepartamentos] = useState(false);
 
   const [skillInput, setSkillInput] = useState('');
 
@@ -93,13 +108,77 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
     clearError: clearCVError,
   } = useCVUpload();
 
+  // Cargar sectores y departamentos al abrir
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const loadData = async () => {
+      setLoadingSectores(true);
+      setLoadingDepartamentos(true);
+      try {
+        const [sectoresData, deptosData] = await Promise.all([
+          sectorsService.getAll(),
+          locationsService.getDepartamentos(),
+        ]);
+        setSectores(sectoresData);
+        setDepartamentos(deptosData);
+      } catch {
+        // Silencioso o manejar error
+      } finally {
+        setLoadingSectores(false);
+        setLoadingDepartamentos(false);
+      }
+    };
+
+    loadData();
+  }, [isOpen]);
+
+  // Cargar ciudades cuando cambia el departamento de ciudad actual
+  useEffect(() => {
+    if (!formData.ciudadId || departamentos.length === 0) return;
+
+    const loadCiudades = async () => {
+      // Encontrar el departamento que contiene esta ciudad
+      for (const depto of departamentos) {
+        const ciudadEnDepto = depto.ciudades.find(c => c.id === formData.ciudadId);
+        if (ciudadEnDepto) {
+          const ciudadesData = await locationsService.getCiudadesByDepartamento(depto.id);
+          setCiudades(ciudadesData);
+          break;
+        }
+      }
+    };
+
+    loadCiudades();
+  }, [formData.ciudadId, departamentos]);
+
+  // Cargar ciudades cuando cambia el departamento de ciudad preferida
+  useEffect(() => {
+    if (!formData.ciudadPreferidaId || departamentos.length === 0) return;
+
+    const loadCiudades = async () => {
+      for (const depto of departamentos) {
+        const ciudadEnDepto = depto.ciudades.find(c => c.id === formData.ciudadPreferidaId);
+        if (ciudadEnDepto) {
+          const ciudadesData = await locationsService.getCiudadesByDepartamento(depto.id);
+          setCiudadesPreferidas(ciudadesData);
+          break;
+        }
+      }
+    };
+
+    loadCiudades();
+  }, [formData.ciudadPreferidaId, departamentos]);
+
+  // Inicializar formulario desde el perfil
   useEffect(() => {
     if (isOpen && profile) {
       setFormData({
         nombres: profile.nombres || '',
         apellidos: profile.apellidos || '',
         telefono: profile.telefono || '',
-        ciudad: profile.ciudad || '',
+        ciudadId: profile.ciudad?.id || '',
+        ciudadNombre: profile.ciudad?.nombre || '',
         fechaNacimiento: profile.fechaNacimiento ? profile.fechaNacimiento.split('T')[0] : '',
         sobreMi: profile.sobreMi || '',
         skills: profile.skills || [],
@@ -108,8 +187,10 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
         portfolio: profile.portfolio || '',
         fotoPerfil: profile.fotoPerfil || '',
         modalidadPreferida: profile.modalidadPreferida || '',
-        sectorPreferido: profile.sectorPreferido || '',
-        ciudadPreferida: profile.ciudadPreferida || '',
+        sectorId: profile.sector?.id || '',
+        sectorNombre: profile.sector?.nombre || '',
+        ciudadPreferidaId: profile.ciudadPreferida?.id || '',
+        ciudadPreferidaNombre: profile.ciudadPreferida?.nombre || '',
         disabilityIds: profile.disabilities?.map(d => d.id) || [],
       });
       clearCVError();
@@ -131,6 +212,38 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
 
   const handleChange = (field: keyof ProfileFormData, value: string | number | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Manejar cambio de departamento para ciudad actual
+  const handleDepartamentoCiudadChange = async (deptoId: string) => {
+    if (!deptoId) {
+      setCiudades([]);
+      handleChange('ciudadId', '');
+      return;
+    }
+    try {
+      const ciudadesData = await locationsService.getCiudadesByDepartamento(deptoId);
+      setCiudades(ciudadesData);
+      handleChange('ciudadId', ''); // Reset ciudad al cambiar departamento
+    } catch {
+      setCiudades([]);
+    }
+  };
+
+  // Manejar cambio de departamento para ciudad preferida
+  const handleDepartamentoCiudadPreferidaChange = async (deptoId: string) => {
+    if (!deptoId) {
+      setCiudadesPreferidas([]);
+      handleChange('ciudadPreferidaId', '');
+      return;
+    }
+    try {
+      const ciudadesData = await locationsService.getCiudadesByDepartamento(deptoId);
+      setCiudadesPreferidas(ciudadesData);
+      handleChange('ciudadPreferidaId', '');
+    } catch {
+      setCiudadesPreferidas([]);
+    }
   };
 
   const addSkill = () => {
@@ -166,10 +279,10 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
       nombres: formData.nombres.trim(),
       apellidos: formData.apellidos.trim(),
       telefono: formData.telefono.trim(),
-      ciudad: formData.ciudad.trim(),
+      ciudadId: formData.ciudadId,
       fechaNacimiento: formData.fechaNacimiento
-      ? new Date(formData.fechaNacimiento).toISOString()
-      : '',
+        ? new Date(formData.fechaNacimiento).toISOString()
+        : '',
       sobreMi: formData.sobreMi.trim(),
       skills: formData.skills,
       salarioEsperado: formData.salarioEsperado === '' ? null : Number(formData.salarioEsperado),
@@ -177,13 +290,26 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
       portfolio: formData.portfolio.trim(),
       fotoPerfil: formData.fotoPerfil.trim(),
       modalidadPreferida: formData.modalidadPreferida,
-      sectorPreferido: formData.sectorPreferido.trim(),
-      ciudadPreferida: formData.ciudadPreferida.trim(),
+      sectorId: formData.sectorId,
+      ciudadPreferidaId: formData.ciudadPreferidaId,
       disabilityIds: formData.disabilityIds,
     };
 
     onSave(payload);
   };
+
+  // Encontrar departamento seleccionado para cada ciudad
+  const getDepartamentoIdForCiudad = (ciudadId: string) => {
+    for (const depto of departamentos) {
+      if (depto.ciudades.some(c => c.id === ciudadId)) {
+        return depto.id;
+      }
+    }
+    return '';
+  };
+
+  const deptoCiudadId = getDepartamentoIdForCiudad(formData.ciudadId);
+  const deptoCiudadPreferidaId = getDepartamentoIdForCiudad(formData.ciudadPreferidaId);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -247,62 +373,38 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
                   className="w-full px-4 py-2.5 rounded-xl border border-cream-200 bg-cream-50 text-brown focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal transition-all"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-brown mb-1.5">Ciudad</label>
-                <input
-                  type="text"
-                  value={formData.ciudad}
-                  onChange={e => handleChange('ciudad', e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-cream-200 bg-cream-50 text-brown focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal transition-all"
-                  placeholder="Lima"
-                />
+
+              {/* CIUDAD ACTUAL - Select en cascada */}
+              <div className="sm:col-span-2 grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-brown mb-1.5">Departamento</label>
+                  <select
+                    value={deptoCiudadId}
+                    onChange={e => handleDepartamentoCiudadChange(e.target.value)}
+                    disabled={loadingDepartamentos}
+                    className="w-full px-4 py-2.5 rounded-xl border border-cream-200 bg-cream-50 text-brown focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal transition-all disabled:opacity-50"
+                  >
+                    <option value="">Seleccionar departamento...</option>
+                    {departamentos.map(d => (
+                      <option key={d.id} value={d.id}>{d.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-brown mb-1.5">Ciudad</label>
+                  <select
+                    value={formData.ciudadId}
+                    onChange={e => handleChange('ciudadId', e.target.value)}
+                    disabled={!deptoCiudadId}
+                    className="w-full px-4 py-2.5 rounded-xl border border-cream-200 bg-cream-50 text-brown focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal transition-all disabled:opacity-50"
+                  >
+                    <option value="">Seleccionar ciudad...</option>
+                    {ciudades.map(c => (
+                      <option key={c.id} value={c.id}>{c.nombre}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              {/* <div>
-                {(formData.fotoPerfil || profile.fotoPerfil) && (
-                  <div className="mb-3 flex items-center gap-3">
-                    <img
-                      src={formData.fotoPerfil || profile.fotoPerfil}
-                      alt="Preview"
-                      className="w-12 h-12 rounded-full object-cover border border-cream-200"
-                    />
-                    <span className="text-xs text-brown/50">Vista previa</span>
-                  </div>
-                )}
-                <label className="block text-sm font-medium text-brown mb-1.5">Foto de perfil</label>
-                <input
-                  ref={fotoInputRef}
-                  type="file"
-                  accept=".jpg,.jpeg,.png,.webp"
-                  onChange={handleFotoFileChange}
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  onClick={openFotoPicker}
-                  disabled={isUploadingFoto}
-                  className="w-full flex items-center gap-2 px-4 py-2.5 h-[46px] rounded-xl border border-cream-200 bg-cream-50 text-brown hover:bg-teal-50 hover:border-teal/30 transition-all text-left"
-                >
-                  <div className="w-8 h-8 bg-teal/10 rounded-lg flex items-center justify-center shrink-0">
-                    {isUploadingFoto ? (
-                      <Loader2 className="w-4 h-4 text-teal animate-spin" />
-                    ) : (
-                      <Upload className="w-4 h-4 text-teal" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-brown">
-                      {isUploadingFoto
-                        ? 'Subiendo foto...'
-                        : profile.fotoPerfil
-                        ? 'Reemplazar foto'
-                        : 'Subir foto de perfil'}
-                    </p>
-                  </div>
-                </button>
-                {fotoUploadError && (
-                  <p className="text-xs text-red-500 mt-1.5">{fotoUploadError}</p>
-                )}
-              </div> */}
             </div>
           </section>
 
@@ -363,7 +465,7 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
                   min={0}
                 />
               </div>
-              {/* CV — Reemplazar desde el modal */}
+              {/* CV */}
               <div>
                 <label className="block text-sm font-medium text-brown mb-1.5 flex items-center gap-1.5">
                   <FileText className="w-4 h-4 text-teal" /> Currículum
@@ -396,9 +498,6 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
                         ? 'Reemplazar currículum'
                         : 'Subir currículum'}
                     </p>
-                    {/* <p className="text-xs text-brown/50">
-                      {profile.cvUrl ? 'Ya tienes un CV subido' : 'PDF, JPG, PNG o WEBP (máx. 5MB)'}
-                    </p> */}
                   </div>
                 </button>
                 {cvUploadError && (
@@ -467,28 +566,50 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
                   ))}
                 </select>
               </div>
+
+              {/* SECTOR - Ahora desde API */}
               <div>
                 <label className="block text-sm font-medium text-brown mb-1.5">Sector preferido</label>
                 <select
-                  value={formData.sectorPreferido}
-                  onChange={e => handleChange('sectorPreferido', e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-cream-200 bg-cream-50 text-brown focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal transition-all"
+                  value={formData.sectorId}
+                  onChange={e => handleChange('sectorId', e.target.value)}
+                  disabled={loadingSectores}
+                  className="w-full px-4 py-2.5 rounded-xl border border-cream-200 bg-cream-50 text-brown focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal transition-all disabled:opacity-50"
                 >
                   <option value="">Seleccionar...</option>
-                  {SECTORES.map(s => (
-                    <option key={s} value={s}>{s}</option>
+                  {sectores.map(s => (
+                    <option key={s.id} value={s.id}>{s.nombre}</option>
                   ))}
                 </select>
               </div>
-              <div>
+
+              {/* CIUDAD PREFERIDA - Select en cascada */}
+              <div className="sm:col-span-1">
                 <label className="block text-sm font-medium text-brown mb-1.5">Ciudad preferida</label>
-                <input
-                  type="text"
-                  value={formData.ciudadPreferida}
-                  onChange={e => handleChange('ciudadPreferida', e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-cream-200 bg-cream-50 text-brown focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal transition-all"
-                  placeholder="Lima"
-                />
+                <div className="space-y-2">
+                  <select
+                    value={deptoCiudadPreferidaId}
+                    onChange={e => handleDepartamentoCiudadPreferidaChange(e.target.value)}
+                    disabled={loadingDepartamentos}
+                    className="w-full px-4 py-2.5 rounded-xl border border-cream-200 bg-cream-50 text-brown focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal transition-all disabled:opacity-50 text-sm"
+                  >
+                    <option value="">Departamento...</option>
+                    {departamentos.map(d => (
+                      <option key={d.id} value={d.id}>{d.nombre}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={formData.ciudadPreferidaId}
+                    onChange={e => handleChange('ciudadPreferidaId', e.target.value)}
+                    disabled={!deptoCiudadPreferidaId}
+                    className="w-full px-4 py-2.5 rounded-xl border border-cream-200 bg-cream-50 text-brown focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal transition-all disabled:opacity-50"
+                  >
+                    <option value="">Ciudad...</option>
+                    {ciudadesPreferidas.map(c => (
+                      <option key={c.id} value={c.id}>{c.nombre}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           </section>
@@ -520,13 +641,13 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
               type="button"
               onClick={onClose}
               className="flex-1 px-6 py-3 rounded-xl border border-cream-200 text-brown font-medium hover:bg-cream-50 transition-colors"
-              disabled={isSaving || isUploadingCV }
+              disabled={isSaving || isUploadingCV}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              disabled={isSaving || isUploadingCV }
+              disabled={isSaving || isUploadingCV}
               className="flex-1 px-6 py-3 rounded-xl bg-teal text-white font-bold hover:bg-teal-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isSaving ? (

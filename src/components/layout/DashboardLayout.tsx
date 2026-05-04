@@ -1,11 +1,13 @@
 import type { ReactNode } from 'react';
 import Navbar from './Navbar';
+import { usePostulanteProfile } from '../../hooks/usePostulanteProfile';
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+  usePostulanteProfile();
   return (
     <div className="min-h-screen bg-cream-50 text-brown font-sans">
       <Navbar />

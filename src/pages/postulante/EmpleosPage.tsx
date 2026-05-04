@@ -23,7 +23,8 @@ const EmpleosPage = () => {
 
   const selectedDisabilities = searchParams.getAll('discapacidad');
   const selectedModalities = searchParams.getAll('modalidad');
-  const selectedSector = searchParams.get('sector') || '';
+  const selectedSectorId = searchParams.get('sectorId') || '';
+  const selectedCiudadId = searchParams.get('ciudadId') || '';
 
   useEffect(() => {
     loadDisabilities();
@@ -50,7 +51,8 @@ const EmpleosPage = () => {
         search: searchParams.get('q') || undefined,
         location: searchParams.get('loc') || undefined,
         modalidad: selectedModalities.length > 0 ? selectedModalities : undefined,
-        sector: selectedSector || undefined,
+        sectorId: selectedSectorId || undefined,
+        ciudadId: selectedCiudadId || undefined,
         disabilityIds: selectedDisabilities.length > 0 ? selectedDisabilities : undefined,
       };
       const data = await postulanteService.getJobOffers(filters);
@@ -97,8 +99,12 @@ const EmpleosPage = () => {
     updateSearchParams({ modalidad: next.length > 0 ? next : null });
   };
 
-  const handleSectorChange = (s: string) => {
-    updateSearchParams({ sector: s || null });
+  const handleSectorChange = (sectorId: string) => {
+    updateSearchParams({ sectorId: sectorId || null });
+  };
+
+  const handleCiudadChange = (ciudadId: string) => {
+    updateSearchParams({ ciudadId: ciudadId || null });
   };
 
   const handleClearFilters = () => {
@@ -153,8 +159,10 @@ const EmpleosPage = () => {
           toggleDisability={toggleDisability}
           selectedModalities={selectedModalities}
           toggleModality={toggleModality}
-          selectedSector={selectedSector}
-          setSelectedSector={handleSectorChange}
+          selectedSectorId={selectedSectorId}
+          setSelectedSectorId={handleSectorChange}
+          selectedCiudadId={selectedCiudadId}
+          setSelectedCiudadId={handleCiudadChange}
           onClear={handleClearFilters}
         />
 

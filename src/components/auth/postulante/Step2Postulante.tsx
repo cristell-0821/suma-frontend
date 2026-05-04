@@ -1,41 +1,85 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Mail, Lock, Smartphone, MapPin, Eye, EyeOff } from 'lucide-react';
+import type { Departamento, Ciudad } from '../../../services/locationsService';
+import { locationsService } from '../../../services/locationsService';
 
 interface Step2PostulanteProps {
   onSubmit: (data: {
     email: string;
     password: string;
     telefono: string;
-    departamento: string;
+    ciudadId: string;
   }) => void;
   onBack: () => void;
 }
-
-const DEPARTAMENTOS_PERU = [
-  'Amazonas', 'Áncash', 'Apurímac', 'Arequipa', 'Ayacucho', 'Cajamarca',
-  'Callao', 'Cusco', 'Huancavelica', 'Huánuco', 'Ica', 'Junín',
-  'La Libertad', 'Lambayeque', 'Lima', 'Loreto', 'Madre de Dios',
-  'Moquegua', 'Pasco', 'Piura', 'Puno', 'San Martín', 'Tacna',
-  'Tumbes', 'Ucayali'
-];
 
 const Step2Postulante = ({ onSubmit, onBack }: Step2PostulanteProps) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     telefono: '',
-    departamento: '',
+    departamentoId: '',
+    ciudadId: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
+  const [ciudades, setCiudades] = useState<Ciudad[]>([]);
+  const [loadingDeptos, setLoadingDeptos] = useState(false);
+
+  // Cargar departamentos al montar
+  useEffect(() => {
+    const loadDepartamentos = async () => {
+      setLoadingDeptos(true);
+      try {
+        const data = await locationsService.getDepartamentos();
+        setDepartamentos(data);
+      } catch (err) {
+        console.error('Error cargando departamentos:', err);
+      } finally {
+        setLoadingDeptos(false);
+      }
+    };
+    loadDepartamentos();
+  }, []);
+
+  // Cargar ciudades cuando cambia departamento
+  useEffect(() => {
+    if (!formData.departamentoId) {
+      setCiudades([]);
+      setFormData(prev => ({ ...prev, ciudadId: '' }));
+      return;
+    }
+
+    const loadCiudades = async () => {
+      try {
+        const data = await locationsService.getCiudadesByDepartamento(formData.departamentoId);
+        setCiudades(data);
+      } catch (err) {
+        console.error('Error cargando ciudades:', err);
+        setCiudades([]);
+      }
+    };
+    loadCiudades();
+  }, [formData.departamentoId]);
+
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.email || !formData.password || !formData.telefono || !formData.departamento) {
+    if (!formData.email || !formData.password || !formData.telefono || !formData.ciudadId) {
       return;
     }
     setLoading(true);
-    onSubmit(formData);
+    onSubmit({
+      email: formData.email,
+      password: formData.password,
+      telefono: formData.telefono,
+      ciudadId: formData.ciudadId,
+    });
   };
 
   return (
@@ -152,14 +196,43 @@ const Step2Postulante = ({ onSubmit, onBack }: Step2PostulanteProps) => {
                   <div className="relative">
                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6d7a73] pointer-events-none" />
                     <select
-                      value={formData.departamento}
-                      onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
-                      className="w-full pl-12 pr-4 py-4 bg-[#fef2de] border-none rounded-xl focus:ring-2 focus:ring-[#00694c] transition-all text-[#201b0f] appearance-none outline-none"
+                      value={formData.departamentoId}
+                      onChange={(e) => handleChange('departamentoId', e.target.value)}
+                      disabled={loadingDeptos}
+                      className="w-full pl-12 pr-4 py-4 bg-[#fef2de] border-none rounded-xl focus:ring-2 focus:ring-[#00694c] transition-all text-[#201b0f] appearance-none outline-none disabled:opacity-50"
                       required
                     >
-                      <option value="" disabled>Seleccionar...</option>
-                      {DEPARTAMENTOS_PERU.map((dept) => (
-                        <option key={dept} value={dept}>{dept}</option>
+                      <option value="" disabled>
+                        {loadingDeptos ? 'Cargando...' : 'Seleccionar...'}
+                      </option>
+                      {departamentos.map((d) => (
+                        <option key={d.id} value={d.id}>{d.nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Ciudad — ocupa toda la fila en móvil, o la mitad si hay espacio */}
+                <div className="group md:col-span-2">
+                  <label className="block font-['Plus_Jakarta_Sans'] font-semibold text-[#201b0f] mb-3 text-sm">
+                    Ciudad
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6d7a73] pointer-events-none" />
+                    <select
+                      value={formData.ciudadId}
+                      onChange={(e) => handleChange('ciudadId', e.target.value)}
+                      disabled={!formData.departamentoId}
+                      className="w-full pl-12 pr-4 py-4 bg-[#fef2de] border-none rounded-xl focus:ring-2 focus:ring-[#00694c] transition-all text-[#201b0f] appearance-none outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                      required
+                    >
+                      <option value="" disabled>
+                        {!formData.departamentoId 
+                          ? 'Primero elige un departamento' 
+                          : 'Seleccionar ciudad...'}
+                      </option>
+                      {ciudades.map((c) => (
+                        <option key={c.id} value={c.id}>{c.nombre}</option>
                       ))}
                     </select>
                   </div>
@@ -167,12 +240,12 @@ const Step2Postulante = ({ onSubmit, onBack }: Step2PostulanteProps) => {
               </div>
 
               {/* Submit */}
-              <button
+               <button
                 type="submit"
-                disabled={loading || !formData.email || !formData.password || !formData.telefono || !formData.departamento}
+                disabled={loading || !formData.email || !formData.password || !formData.telefono || !formData.ciudadId}
                 className={`
                   w-full py-5 font-['Plus_Jakarta_Sans'] font-bold text-lg rounded-xl transition-all mt-4
-                  ${!loading && formData.email && formData.password && formData.telefono && formData.departamento
+                  ${!loading && formData.email && formData.password && formData.telefono && formData.ciudadId
                     ? 'bg-[#fd7549] text-white hover:opacity-90 active:scale-[0.98] shadow-lg shadow-[#fd7549]/20'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }

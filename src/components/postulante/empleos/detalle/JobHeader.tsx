@@ -15,6 +15,15 @@ const JobHeader = ({ offer, onApply, onSave, isSaved }: Props) => {
     PRESENCIAL: 'Presencial',
   };
 
+  // ✅ Extraer strings ANTES de JSX
+  const ciudadNombre = typeof offer.ciudad === 'string' 
+    ? offer.ciudad 
+    : offer.ciudad?.nombre || 'Ubicación no especificada';
+  
+  const sectorNombre = typeof offer.sector === 'string'
+    ? offer.sector
+    : offer.sector?.nombre || '';
+
   return (
     <header className="mb-10">
       <div className="grid lg:grid-cols-3 gap-8 items-end">
@@ -33,11 +42,16 @@ const JobHeader = ({ offer, onApply, onSave, isSaved }: Props) => {
               )}
             </div>
             <div>
-              <p className="text-teal font-semibold tracking-wide uppercase text-sm">
+              <p className="text-teal font-semibold tracking-wide uppercase text-sm flex items-center gap-2 flex-wrap">
                 {offer.empresa.razonSocial}
                 {offer.empresa.isVerified && (
-                  <span className="inline-flex items-center gap-1 ml-2 text-xs bg-teal-50 text-teal px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center gap-1 text-xs bg-teal-50 text-teal px-2 py-0.5 rounded-full">
                     Verificada
+                  </span>
+                )}
+                {sectorNombre && (
+                  <span className="inline-flex items-center gap-1 text-xs bg-coral-50 text-coral px-2 py-0.5 rounded-full">
+                    {sectorNombre}
                   </span>
                 )}
               </p>
@@ -51,7 +65,7 @@ const JobHeader = ({ offer, onApply, onSave, isSaved }: Props) => {
           <div className="flex flex-wrap gap-3">
             <div className="flex items-center gap-2 bg-cream-100 px-4 py-2 rounded-full text-brown/70 text-sm font-medium">
               <MapPin className="w-4 h-4 text-teal" />
-              {offer.ciudad} ({modalityLabels[offer.modalidad] || offer.modalidad})
+              {ciudadNombre} ({modalityLabels[offer.modalidad] || offer.modalidad})
             </div>
             <div className="flex items-center gap-2 bg-cream-100 px-4 py-2 rounded-full text-brown/70 text-sm font-medium">
               <Briefcase className="w-4 h-4 text-teal" />
@@ -79,16 +93,6 @@ const JobHeader = ({ offer, onApply, onSave, isSaved }: Props) => {
           >
             Postular ahora
           </button>
-          {/* <button
-            onClick={onSave}
-            className={`flex items-center justify-center gap-2 border-2 px-8 py-3 rounded-xl font-semibold transition-all ${
-              isSaved
-                ? 'border-coral bg-coral-50 text-coral'
-                : 'border-cream-200 bg-white text-brown hover:bg-cream-50'
-            }`}
-          >
-            {isSaved ? 'Guardado' : 'Guardar vacante'}
-          </button> */}
         </div>
       </div>
     </header>

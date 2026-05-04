@@ -158,12 +158,10 @@ const Navbar = () => {
               <div className="relative group">
                 {/* Avatar */}
                 <button className="w-10 h-10 rounded-full border-2 border-teal overflow-hidden bg-teal-50 flex items-center justify-center text-teal font-bold text-sm hover:bg-teal-100 transition-colors">
-                  {user?.fotoPerfil ? (
-                    <img
-                      src={user.fotoPerfil}
-                      alt="Avatar"
-                      className="w-full h-full object-cover"
-                    />
+                  {user?.role === 'EMPRESA' && user?.logoUrl ? (
+                    <img src={user.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                  ) : user?.fotoPerfil ? (
+                    <img src={user.fotoPerfil} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
                     user?.email?.charAt(0).toUpperCase() || 'U'
                   )}

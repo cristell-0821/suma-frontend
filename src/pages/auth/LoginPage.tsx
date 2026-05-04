@@ -31,6 +31,19 @@ const LoginPage = () => {
           break;
         // ... etc
       }
+      switch (response.user.role) {
+        case 'POSTULANTE':
+          navigate('/postulante/empleos');
+          break;
+        case 'EMPRESA':
+          navigate('/empresa/perfil');
+          break;
+        case 'SUPERADMIN':
+          navigate('/admin');
+          break;
+        default:
+          navigate('/');
+      }
       console.log('✅ Navegación llamada');
     } catch (err: any) {
       console.error('❌ Error en login:', err);

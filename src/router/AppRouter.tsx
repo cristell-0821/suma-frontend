@@ -16,7 +16,11 @@ import PostulacionesPage from '../pages/postulante/PostulacionesPage';
 import PerfilPage from '../pages/postulante/PerfilPage';
 import DetalleEmpleoPage from '../pages/postulante/DetalleEmpleoPage';
 
-import EmpresaDashboard from '../pages/empresa/EmpresaDashboard';
+// Páginas empresa (NUEVAS)
+import EmpresaPerfilPage from '../pages/empresa/EmpresaPerfilPage';
+import VacantesPage from '../pages/empresa/VacantesPage';
+import PostulantesPage from '../pages/empresa/PostulantesPage';
+
 import AdminDashboard from '../pages/admin/AdminDashboard';
 
 // ============================================
@@ -105,6 +109,7 @@ const AppRouter = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />
           
+          {/*  POSTULANTE */}
           <Route 
             path="/postulante/*" 
             element={
@@ -138,15 +143,41 @@ const AppRouter = () => {
             }
           />
           
+          {/* Empresa — RUTAS NUEVAS */}
           <Route 
-            path="/empresa/*" 
+            path="/empresa/perfil" 
             element={
               <ProtectedRoute allowedRoles={['EMPRESA']}>
-                <EmpresaDashboard />
+                <EmpresaPerfilPage />
               </ProtectedRoute>
             } 
           />
-          
+          <Route 
+            path="/empresa/vacantes" 
+            element={
+              <ProtectedRoute allowedRoles={['EMPRESA']}>
+                <VacantesPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/empresa/postulantes" 
+            element={
+              <ProtectedRoute allowedRoles={['EMPRESA']}>
+                <PostulantesPage />
+              </ProtectedRoute>
+            } 
+          />
+          {/* Redirect /empresa → /empresa/perfil */}
+          <Route 
+            path="/empresa" 
+            element={
+              <ProtectedRoute allowedRoles={['EMPRESA']}>
+                <Navigate to="/empresa/perfil" replace />
+              </ProtectedRoute>
+            } 
+          />
+
           <Route 
             path="/admin/*" 
             element={

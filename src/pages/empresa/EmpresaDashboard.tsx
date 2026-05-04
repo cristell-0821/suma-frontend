@@ -71,7 +71,7 @@ const EmpresaDashboard = () => {
     }
   };
 
-  const handleCreateOffer = async (e: React.FormEvent) => {
+/*   const handleCreateOffer = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
@@ -104,7 +104,7 @@ const EmpresaDashboard = () => {
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al crear oferta');
     }
-  };
+  }; */
 
   const handleUpdateStatus = async (applicationId: string, newStatus: string) => {
     try {
@@ -302,7 +302,7 @@ const EmpresaDashboard = () => {
           <div>
             <h2 className="text-xl font-bold text-brown-500 mb-6">Crear nueva oferta</h2>
             
-            <form onSubmit={handleCreateOffer} className="card space-y-6">
+            {/* <form onSubmit={handleCreateOffer} className="card space-y-6">
               <div>
                 <label className="block text-sm font-medium text-brown-500 mb-1">Título del puesto *</label>
                 <input
@@ -436,7 +436,7 @@ const EmpresaDashboard = () => {
               <button type="submit" className="btn-secondary w-full">
                 Publicar oferta
               </button>
-            </form>
+            </form> */}
           </div>
         )}
 

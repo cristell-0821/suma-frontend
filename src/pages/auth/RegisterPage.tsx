@@ -28,15 +28,15 @@ const RegisterPage = () => {
     email: string;
     password: string;
     telefono: string;
-    departamento: string;
+    ciudadId: string; 
   } | null>(null);
 
   const [empresaData, setEmpresaData] = useState<{
     razonSocial: string;
     ruc: string;
-    sector: string;
+    sectorId: string;
     tamaño: string;
-    ciudad: string;
+    ciudadId: string;
   } | null>(null);
 
   const [error, setError] = useState('');
@@ -64,7 +64,7 @@ const RegisterPage = () => {
       email: '',
       password: '',
       telefono: '',
-      departamento: '',
+      ciudadId: '',
     });
     setStep('postulante2');
   };
@@ -73,7 +73,7 @@ const RegisterPage = () => {
     email: string;
     password: string;
     telefono: string;
-    departamento: string;
+    ciudadId: string;  // ← cambiado de departamento: string
   }) => {
     if (!postulanteData) return;
 
@@ -93,7 +93,7 @@ const RegisterPage = () => {
         nombres: postulanteData.nombres,
         apellidos: postulanteData.apellidos,
         telefono: data.telefono,
-        ciudad: data.departamento,
+        ciudadId: data.ciudadId,        // ← NUEVO: enviar ciudadId
         disabilityIds: postulanteData.disabilityIds,
       });
 
@@ -108,9 +108,9 @@ const RegisterPage = () => {
   const handleEmpresaStep1 = (data: {
     razonSocial: string;
     ruc: string;
-    sector: string;
+    sectorId: string;
     tamaño: string;
-    ciudad: string;
+    ciudadId: string;
   }) => {
     setEmpresaData(data);
     setStep('empresa2');
@@ -140,9 +140,9 @@ const RegisterPage = () => {
       await empresaService.updateProfile({
         razonSocial: empresaData.razonSocial,
         ruc: empresaData.ruc,
-        sector: empresaData.sector,
+        sectorId: empresaData.sectorId,     // ← cambiado
         tamaño: empresaData.tamaño,
-        ciudad: empresaData.ciudad,
+        ciudadId: empresaData.ciudadId,     // ← cambiado
         nombreContacto: data.nombreContacto,
         cargoContacto: data.cargoContacto,
         telefonoContacto: data.telefonoContacto,

@@ -57,10 +57,10 @@ const ProfileHeader = ({ profile, onEdit, onPhotoClick }: Props) => {
                 {profile.disabilities.map(d => d.nombre).join(', ')}
               </span>
             )}
-            {profile.ciudad && (
+            {profile.ciudadPreferida?.nombre && (
               <span className="flex items-center gap-1.5 text-sm">
                 <MapPin className="w-4 h-4" />
-                {profile.ciudad}
+                {profile.ciudadPreferida.nombre}
               </span>
             )}
           </div>
