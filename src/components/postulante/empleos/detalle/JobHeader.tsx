@@ -1,21 +1,23 @@
-import { MapPin, Briefcase, DollarSign, Clock, Building2 } from 'lucide-react';
+import { MapPin, Briefcase, DollarSign, Clock, Building2, CheckCircle2,ArrowLeft, } from 'lucide-react';
 import type { JobOffer } from '../types';
+import { Link } from 'react-router-dom';
 
 interface Props {
   offer: JobOffer;
   onApply: () => void;
   onSave: () => void;
   isSaved?: boolean;
+  hasApplied?: boolean;
+  isApplying?: boolean;
 }
 
-const JobHeader = ({ offer, onApply, onSave, isSaved }: Props) => {
+const JobHeader = ({ offer, onApply, onSave, isSaved, hasApplied = false, isApplying = false }: Props) => {
   const modalityLabels: Record<string, string> = {
     REMOTO: 'Remoto',
     HIBRIDO: 'Híbrido',
     PRESENCIAL: 'Presencial',
   };
 
-  // ✅ Extraer strings ANTES de JSX
   const ciudadNombre = typeof offer.ciudad === 'string' 
     ? offer.ciudad 
     : offer.ciudad?.nombre || 'Ubicación no especificada';
@@ -25,17 +27,25 @@ const JobHeader = ({ offer, onApply, onSave, isSaved }: Props) => {
     : offer.sector?.nombre || '';
 
   return (
-    <header className="mb-10">
+    <header className="mb-10 relative">
+      {/* Botón regresar */}
+      <Link
+        to="/postulante/empleos"
+        className="absolute top-0 right-0 flex items-center gap-2 text-teal hover:text-teal-700 font-medium transition"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Regresar
+      </Link>
       <div className="grid lg:grid-cols-3 gap-8 items-end">
         <div className="lg:col-span-2 space-y-5">
           {/* Empresa + Título */}
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-xl bg-cream-50 flex items-center justify-center border border-cream-200">
-              {offer.empresa.logo ? (
+              {offer.empresa.logoUrl ? ( 
                 <img
-                  src={offer.empresa.logo}
+                  src={offer.empresa.logoUrl}
                   alt={offer.empresa.razonSocial}
-                  className="w-10 h-10 object-contain"
+                  className="w-15 h-15 object-contain rounded-xl"
                 />
               ) : (
                 <Building2 className="w-8 h-8 text-teal" />
@@ -87,12 +97,24 @@ const JobHeader = ({ offer, onApply, onSave, isSaved }: Props) => {
 
         {/* Acciones */}
         <div className="lg:col-span-1 flex flex-col gap-3">
-          <button
-            onClick={onApply}
-            className="bg-teal text-white font-bold text-lg px-8 py-4 rounded-xl shadow-lg hover:bg-teal-600 active:scale-95 transition-all"
-          >
-            Postular ahora
-          </button>
+          {hasApplied ? (
+            // ← NUEVO: Estado "Ya postulaste"
+            <button
+              disabled
+              className="bg-cream-200 text-brown/50 font-bold text-lg px-8 py-4 rounded-xl cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <CheckCircle2 className="w-5 h-5" />
+              Ya postulaste
+            </button>
+          ) : (
+            <button
+              onClick={onApply}
+              disabled={isApplying}
+              className="bg-teal text-white font-bold text-lg px-8 py-4 rounded-xl shadow-lg hover:bg-teal-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isApplying ? 'Verificando...' : 'Postular ahora'}
+            </button>
+          )}
         </div>
       </div>
     </header>

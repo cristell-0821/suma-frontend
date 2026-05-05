@@ -43,6 +43,8 @@ const EmpleosPage = () => {
     }
   };
 
+  const selectedDepartamentoId = searchParams.get('departamentoId') || '';
+
   const loadOffers = async () => {
     setLoading(true);
     setError('');
@@ -53,6 +55,7 @@ const EmpleosPage = () => {
         modalidad: selectedModalities.length > 0 ? selectedModalities : undefined,
         sectorId: selectedSectorId || undefined,
         ciudadId: selectedCiudadId || undefined,
+        departamentoId: selectedDepartamentoId || undefined,  // ← NUEVO
         disabilityIds: selectedDisabilities.length > 0 ? selectedDisabilities : undefined,
       };
       const data = await postulanteService.getJobOffers(filters);
@@ -64,8 +67,23 @@ const EmpleosPage = () => {
     }
   };
 
+  const handleDepartamentoChange = (departamentoId: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    
+    if (departamentoId) {
+      newParams.set('departamentoId', departamentoId);
+    } else {
+      newParams.delete('departamentoId');
+    }
+    
+    newParams.delete('ciudadId'); // Reset ciudad
+    
+    setSearchParams(newParams);
+  };
+
   const updateSearchParams = useCallback(
     (updates: Record<string, string | string[] | null>) => {
+       console.log('📝 updateSearchParams called with:', updates);
       const newParams = new URLSearchParams(searchParams);
       Object.entries(updates).forEach(([key, value]) => {
         newParams.delete(key);
@@ -104,7 +122,15 @@ const EmpleosPage = () => {
   };
 
   const handleCiudadChange = (ciudadId: string) => {
-    updateSearchParams({ ciudadId: ciudadId || null });
+    const newParams = new URLSearchParams(searchParams);
+    
+    if (ciudadId) {
+      newParams.set('ciudadId', ciudadId);
+    } else {
+      newParams.delete('ciudadId');
+    }
+    
+    setSearchParams(newParams);
   };
 
   const handleClearFilters = () => {
@@ -163,6 +189,8 @@ const EmpleosPage = () => {
           setSelectedSectorId={handleSectorChange}
           selectedCiudadId={selectedCiudadId}
           setSelectedCiudadId={handleCiudadChange}
+          selectedDepartamentoId={selectedDepartamentoId}
+          setSelectedDepartamentoId={handleDepartamentoChange}
           onClear={handleClearFilters}
         />
 

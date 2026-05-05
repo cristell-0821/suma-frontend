@@ -46,7 +46,7 @@ const JobSidebar = ({ offer }: Props) => {
       </div>
 
       {/* Compartir */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-cream-200">
+      {/* <div className="bg-white p-6 rounded-2xl shadow-sm border border-cream-200">
         <h3 className="text-lg font-bold text-brown mb-4 font-sans">Compartir</h3>
         <div className="flex gap-3">
           <button
@@ -70,7 +70,7 @@ const JobSidebar = ({ offer }: Props) => {
             Email
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* Ayuda */}
       <div className="bg-coral text-white p-6 rounded-2xl">

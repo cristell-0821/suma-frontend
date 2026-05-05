@@ -58,11 +58,20 @@ const PerfilPage = () => {
   const handleSave = async (formData: ProfileUpdatePayload) => {
     setSaving(true);
     try {
-      await postulanteService.updateProfile(formData);
-      await loadProfile(); // ← loadProfile ya sincroniza la foto al store
+      // Limpiar campos vacíos antes de enviar
+      const cleanPayload: ProfileUpdatePayload = Object.fromEntries(
+        Object.entries(formData).filter(([_, v]) => 
+          v !== '' && v !== undefined && !(Array.isArray(v) && v.length === 0)
+        )
+      ) as ProfileUpdatePayload;
+
+      await postulanteService.updateProfile(cleanPayload);
+      await loadProfile();
       setIsEditing(false);
-    } catch {
-      setError('Error al guardar los cambios');
+      setError('');
+    } catch (err: any) {
+      console.error('Error al guardar:', err.response?.data);
+      setError(err.response?.data?.message || 'Error al guardar los cambios');
     } finally {
       setSaving(false);
     }
@@ -83,29 +92,12 @@ const PerfilPage = () => {
   };
 
   const handlePhotoUpdate = async (fotoUrl: string | null) => {
-    if (!profile) return;
-    
     try {
-      await postulanteService.updateProfile({
-        nombres: profile.nombres,
-        apellidos: profile.apellidos,
-        telefono: profile.telefono || '',
-        ciudadId: profile.ciudad?.id || '',
-        fechaNacimiento: profile.fechaNacimiento || '',
-        sobreMi: profile.sobreMi || '',
-        skills: profile.skills || [],
-        salarioEsperado: profile.salarioEsperado ?? null,
-        linkedin: profile.linkedin || '',
-        portfolio: profile.portfolio || '',
-        fotoPerfil: fotoUrl || '',
-        modalidadPreferida: profile.modalidadPreferida || '',
-        sectorId: profile.sector?.id || '',
-        ciudadPreferidaId: profile.ciudadPreferida?.id || '',
-        disabilityIds: profile.disabilities?.map(d => d.id) || [],
-      });
-      await loadProfile(); // ← loadProfile ya sincroniza la foto al store
-    } catch {
-      setError('Error al actualizar la foto');
+      await postulanteService.updateProfilePhoto(fotoUrl);
+      await loadProfile();
+    } catch (err: any) {
+      console.error('Error:', err.response?.data);
+      setError(err.response?.data?.message || 'Error al actualizar la foto');
     }
   };
 

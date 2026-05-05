@@ -20,7 +20,9 @@ export const postulanteService = {
     search?: string;
     location?: string;
     modality?: string | string[];
-    sector?: string;
+    sectorId?: string;
+    ciudadId?: string;
+    departamentoId?: string;  // ← NUEVO
     disabilityIds?: string[];
   }) => {
     const params = new URLSearchParams();
@@ -33,7 +35,9 @@ export const postulanteService = {
         params.append('modality', filters.modality);
       }
     }
-    if (filters?.sector) params.append('sector', filters.sector);
+    if (filters?.sectorId) params.append('sectorId', filters.sectorId);
+    if (filters?.ciudadId) params.append('ciudadId', filters.ciudadId);
+    if (filters?.departamentoId) params.append('departamentoId', filters.departamentoId);  // ← NUEVO
     if (filters?.disabilityIds) {
       filters.disabilityIds.forEach((id) => params.append('disabilityId', id));
     }
@@ -61,5 +65,9 @@ export const postulanteService = {
       mensaje,
     });
     return response.data;
+  },
+  updateProfilePhoto: async (fotoPerfil: string | null) => {
+    const { data } = await api.patch('/postulantes/perfil/foto', { fotoPerfil });
+    return data;
   },
 };

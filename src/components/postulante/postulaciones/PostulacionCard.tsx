@@ -35,11 +35,11 @@ const PostulacionCard = ({ application }: Props) => {
       <div className="flex flex-col sm:flex-row gap-5">
         {/* Logo */}
         <div className="w-14 h-14 rounded-xl bg-cream-50 flex items-center justify-center border border-cream-200 shrink-0">
-          {application.jobOffer.empresa.logo ? (
+          {application.jobOffer.empresa.logoUrl ? (
             <img
-              src={application.jobOffer.empresa.logo}
+              src={application.jobOffer.empresa.logoUrl}
               alt={application.jobOffer.empresa.razonSocial}
-              className="w-9 h-9 object-contain"
+              className="w-13 h-13 object-contain rounded-xl"
             />
           ) : (
             <Building2 className="w-6 h-6 text-brown/30" />
@@ -62,7 +62,7 @@ const PostulacionCard = ({ application }: Props) => {
                 {application.jobOffer.empresa.razonSocial}
               </p>
             </div>
-            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${status.bg} ${status.color}`}>
+            <span className={`px-3 py-1 mt-8 rounded-full text-xs font-bold uppercase tracking-wider ${status.bg} ${status.color}`}>
               {status.label}
             </span>
           </div>

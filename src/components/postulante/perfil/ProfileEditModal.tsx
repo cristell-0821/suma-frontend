@@ -278,21 +278,21 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
     const payload: ProfileUpdatePayload = {
       nombres: formData.nombres.trim(),
       apellidos: formData.apellidos.trim(),
-      telefono: formData.telefono.trim(),
-      ciudadId: formData.ciudadId,
+      telefono: formData.telefono.trim() || undefined,
+      ciudadId: formData.ciudadId || undefined,
       fechaNacimiento: formData.fechaNacimiento
         ? new Date(formData.fechaNacimiento).toISOString()
-        : '',
-      sobreMi: formData.sobreMi.trim(),
-      skills: formData.skills,
+        : undefined,
+      sobreMi: formData.sobreMi.trim() || undefined,
+      skills: formData.skills.length > 0 ? formData.skills : undefined,
       salarioEsperado: formData.salarioEsperado === '' ? null : Number(formData.salarioEsperado),
-      linkedin: formData.linkedin.trim(),
-      portfolio: formData.portfolio.trim(),
-      fotoPerfil: formData.fotoPerfil.trim(),
-      modalidadPreferida: formData.modalidadPreferida,
-      sectorId: formData.sectorId,
-      ciudadPreferidaId: formData.ciudadPreferidaId,
-      disabilityIds: formData.disabilityIds,
+      linkedin: formData.linkedin.trim() || undefined,
+      portfolio: formData.portfolio.trim() || undefined,
+      fotoPerfil: formData.fotoPerfil.trim() || undefined,
+      modalidadPreferida: formData.modalidadPreferida || undefined,
+      sectorId: formData.sectorId || undefined,
+      ciudadPreferidaId: formData.ciudadPreferidaId || undefined,
+      disabilityIds: formData.disabilityIds.length > 0 ? formData.disabilityIds : undefined,
     };
 
     onSave(payload);
@@ -581,35 +581,6 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
                     <option key={s.id} value={s.id}>{s.nombre}</option>
                   ))}
                 </select>
-              </div>
-
-              {/* CIUDAD PREFERIDA - Select en cascada */}
-              <div className="sm:col-span-1">
-                <label className="block text-sm font-medium text-brown mb-1.5">Ciudad preferida</label>
-                <div className="space-y-2">
-                  <select
-                    value={deptoCiudadPreferidaId}
-                    onChange={e => handleDepartamentoCiudadPreferidaChange(e.target.value)}
-                    disabled={loadingDepartamentos}
-                    className="w-full px-4 py-2.5 rounded-xl border border-cream-200 bg-cream-50 text-brown focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal transition-all disabled:opacity-50 text-sm"
-                  >
-                    <option value="">Departamento...</option>
-                    {departamentos.map(d => (
-                      <option key={d.id} value={d.id}>{d.nombre}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={formData.ciudadPreferidaId}
-                    onChange={e => handleChange('ciudadPreferidaId', e.target.value)}
-                    disabled={!deptoCiudadPreferidaId}
-                    className="w-full px-4 py-2.5 rounded-xl border border-cream-200 bg-cream-50 text-brown focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal transition-all disabled:opacity-50"
-                  >
-                    <option value="">Ciudad...</option>
-                    {ciudadesPreferidas.map(c => (
-                      <option key={c.id} value={c.id}>{c.nombre}</option>
-                    ))}
-                  </select>
-                </div>
               </div>
             </div>
           </section>

@@ -17,6 +17,8 @@ interface Props {
   selectedCiudadId: string;
   setSelectedCiudadId: (c: string) => void;
   onClear: () => void;
+  selectedDepartamentoId: string;
+  setSelectedDepartamentoId: (id: string) => void;
 }
 
 const MODALITIES = [
@@ -35,12 +37,13 @@ const FilterSidebar = ({
   setSelectedSectorId,
   selectedCiudadId,
   setSelectedCiudadId,
+  selectedDepartamentoId,
+  setSelectedDepartamentoId,
   onClear,
 }: Props) => {
   const [sectores, setSectores] = useState<Sector[]>([]);
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [ciudades, setCiudades] = useState<Ciudad[]>([]);
-  const [departamentoId, setDepartamentoId] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,12 +51,12 @@ const FilterSidebar = ({
   }, []);
 
   useEffect(() => {
-    if (departamentoId) {
-      loadCiudades(departamentoId);
+    if (selectedDepartamentoId) {
+      loadCiudades(selectedDepartamentoId);
     } else {
       setCiudades([]);
     }
-  }, [departamentoId]);
+  }, [selectedDepartamentoId]);
 
   const loadData = async () => {
     setLoading(true);
@@ -81,12 +84,12 @@ const FilterSidebar = ({
   };
 
   const handleDepartamentoChange = (value: string) => {
-    setDepartamentoId(value);
-    setSelectedCiudadId(''); // Reset ciudad
+    console.log('🎯 FilterSidebar - handleDepartamentoChange called with:', value);
+    setSelectedDepartamentoId(value);
   };
 
   const handleClear = () => {
-    setDepartamentoId('');
+    setSelectedDepartamentoId('');
     setSelectedCiudadId('');
     setSelectedSectorId('');
     onClear();
@@ -170,13 +173,13 @@ const FilterSidebar = ({
           {/* Departamento */}
           <div className="mb-3">
             <select
-              value={departamentoId}
+              value={selectedDepartamentoId}
               onChange={(e) => handleDepartamentoChange(e.target.value)}
               className="w-full bg-cream-50 border border-cream-200 rounded-xl p-2.5 text-brown text-sm focus:outline-none focus:ring-2 focus:ring-teal/20 focus:border-teal appearance-none"
             >
               <option value="">Todos los departamentos</option>
-              {departamentos.map((d) => (
-                <option key={d.id} value={d.id}>{d.nombre}</option>
+                {departamentos.map((d) => (
+                  <option key={d.id} value={d.id}>{d.nombre}</option>
               ))}
             </select>
           </div>
@@ -187,11 +190,11 @@ const FilterSidebar = ({
             <select
               value={selectedCiudadId}
               onChange={(e) => setSelectedCiudadId(e.target.value)}
-              disabled={!departamentoId}
+              disabled={!selectedDepartamentoId}
               className="w-full pl-9 pr-3 py-2.5 bg-cream-50 border border-cream-200 rounded-xl text-brown text-sm focus:outline-none focus:ring-2 focus:ring-teal/20 focus:border-teal appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">
-                {departamentoId ? 'Todas las ciudades' : 'Primero elige un departamento'}
+                {selectedDepartamentoId ? 'Todas las ciudades' : 'Primero elige un departamento'}
               </option>
               {ciudades.map((c) => (
                 <option key={c.id} value={c.id}>{c.nombre}</option>
@@ -209,14 +212,14 @@ const FilterSidebar = ({
       </div>
 
       {/* Featured Card */}
-      <div className="bg-coral text-white p-6 rounded-2xl">
+      {/* <div className="bg-coral text-white p-6 rounded-2xl">
         <p className="text-xs font-bold uppercase mb-2 opacity-80">Consejo de Suma</p>
         <h4 className="text-lg font-bold mb-3 leading-tight font-sans">Muestra tu potencial real.</h4>
         <p className="mb-4 opacity-90 text-sm">Las empresas en Suma buscan tu talento único más allá de las etiquetas tradicionales.</p>
         <button className="inline-flex items-center gap-2 font-bold hover:gap-3 transition-all text-sm">
           Ver guía de perfil <ArrowRight className="w-4 h-4" />
         </button>
-      </div>
+      </div> */}
     </aside>
   );
 };

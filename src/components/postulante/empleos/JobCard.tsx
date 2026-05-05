@@ -49,8 +49,8 @@ const JobCard = ({ offer, onApply, onViewDetail }: Props) => {
       <div className="flex gap-5">
         {/* Logo */}
         <div className="w-14 h-14 rounded-xl bg-cream-50 flex items-center justify-center flex-shrink-0 border border-cream-200">
-          {offer.empresa.logo ? (
-            <img src={offer.empresa.logo} alt={offer.empresa.razonSocial} className="w-9 h-9 object-contain" />
+          {offer.empresa.logoUrl ? ( 
+            <img src={offer.empresa.logoUrl} alt={offer.empresa.razonSocial} className="w-13 h-13 object-contain rounded-xl" />
           ) : (
             <Briefcase className="w-6 h-6 text-brown/30" />
           )}

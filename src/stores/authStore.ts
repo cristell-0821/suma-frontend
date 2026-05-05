@@ -67,13 +67,15 @@ export const useAuthStore = create<AuthState>()(
             headers: { Authorization: `Bearer ${token}` }
           });
 
-          const { user: userData } = response.data;
+          const userData = response.data.user;
 
           set({
             user: {
               id: userData.userId,
               email: userData.email,
               role: userData.role,
+              fotoPerfil: userData.fotoPerfil,
+              logoUrl: userData.logoUrl,  
             },
             isAuthenticated: true,
             isLoading: false,

@@ -9,6 +9,7 @@ export interface Empresa {
   ruc?: string;
   isVerified: boolean;
   logo?: string;
+  logoUrl?: string; 
 }
 
 export interface Sector {
@@ -58,12 +59,14 @@ export interface Application {
   status: 'ENVIADO' | 'EN_REVISION' | 'ENTREVISTA' | 'CONTRATADO' | 'RECHAZADO';
   createdAt: string;
   mensaje?: string;
+  jobOfferId: string;
   jobOffer: {
     id: string;
     titulo: string;
     empresa: {
       razonSocial: string;
       logo?: string;
+      logoUrl?: string;
     };
     modalidad: string;
     ciudad: string;

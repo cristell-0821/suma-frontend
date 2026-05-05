@@ -5,9 +5,8 @@ import JobHeader from '../../components/postulante/empleos/detalle/JobHeader';
 import InclusionSection from '../../components/postulante/empleos/detalle/InclusionSection';
 import JobDescription from '../../components/postulante/empleos/detalle/JobDescription';
 import JobSidebar from '../../components/postulante/empleos/detalle/JobSidebar';
-import MobileActionBar from '../../components/postulante/empleos/detalle/MobileActionBar';
 import { postulanteService } from '../../services/postulanteService';
-import type { JobOffer } from '../../components/postulante/empleos/types';
+import type { JobOffer, Application } from '../../components/postulante/empleos/types';
 
 const DetalleEmpleoPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,9 +17,14 @@ const DetalleEmpleoPage = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isSaved, setIsSaved] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false); // ← NUEVO
+  const [checkingApplication, setCheckingApplication] = useState(false); // ← NUEVO
 
   useEffect(() => {
-    if (id) loadOffer(id);
+    if (id) {
+      loadOffer(id);
+      checkIfApplied(id); // ← NUEVO
+    }
   }, [id]);
 
   const loadOffer = async (offerId: string) => {
@@ -35,10 +39,28 @@ const DetalleEmpleoPage = () => {
     }
   };
 
+  // ← NUEVO: Verificar si ya postulaste
+  const checkIfApplied = async (offerId: string) => {
+    setCheckingApplication(true);
+    try {
+      const applications: Application[] = await postulanteService.getMyApplications();
+      const alreadyApplied = applications.some(
+        (app) => app.jobOfferId === offerId || app.jobOffer?.id === offerId
+      );
+      setHasApplied(alreadyApplied);
+    } catch {
+      // Silencioso - si falla, asumimos que no ha postulado
+      setHasApplied(false);
+    } finally {
+      setCheckingApplication(false);
+    }
+  };
+
   const handleApply = async () => {
-    if (!id) return;
+    if (!id || hasApplied) return; // ← Bloquear si ya postuló
     try {
       await postulanteService.applyToJob(id, 'Me interesa esta oferta');
+      setHasApplied(true); // ← Marcar como postulado
       setSuccessMessage('¡Postulación enviada exitosamente!');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err: any) {
@@ -99,6 +121,8 @@ const DetalleEmpleoPage = () => {
           onApply={handleApply}
           onSave={handleSave}
           isSaved={isSaved}
+          hasApplied={hasApplied}
+          isApplying={checkingApplication}
         />
 
         <div className="grid lg:grid-cols-12 gap-8">
@@ -117,11 +141,6 @@ const DetalleEmpleoPage = () => {
         </div>
       </div>
 
-      <MobileActionBar
-        onApply={handleApply}
-        onSave={handleSave}
-        isSaved={isSaved}
-      />
     </DashboardLayout>
   );
 };
