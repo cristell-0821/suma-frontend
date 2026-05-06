@@ -20,11 +20,8 @@ const LoginPage = () => {
       const response = await authService.login({ email, password });
       console.log('✅ Login exitoso:', response.user.role);
       
-      console.log('📝 Guardando en store...');
       setAuth(response.user, response.accessToken, response.refreshToken);
-      console.log('✅ Store actualizado');
       
-      console.log('🚀 Navegando a ruta...');
       switch (response.user.role) {
         case 'POSTULANTE':
           navigate('/postulante');

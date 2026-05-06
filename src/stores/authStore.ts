@@ -97,7 +97,6 @@ export const useAuthStore = create<AuthState>()(
         set({ hasHydrated: value });
       },
 
-      // ← AQUÍ VA: justo después de setHasHydrated, antes del cierre del objeto
       updateUserPhoto: (fotoPerfil) => {
         const current = get().user;
         if (current) {
