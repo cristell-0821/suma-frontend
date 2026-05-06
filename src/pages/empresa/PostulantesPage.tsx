@@ -3,8 +3,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import { empresaService } from '../../services/empresaService';
 import PostulanteCard from '../../components/empresa/PostulanteCard';
 import PostulanteDetailModal from '../../components/empresa/PostulanteDetailModal';
-import { useAuthStore } from '../../stores/authStore';
-import type { Application, ApplicationStatus } from '@/types/application';
+import type { Application, } from '@/types/application';
 
 const STATUS_OPTIONS = [
   { value: 'ENVIADO', label: 'Enviado', color: 'bg-gray-100 text-gray-700 border-gray-200' },

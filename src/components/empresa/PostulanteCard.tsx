@@ -20,7 +20,7 @@ interface Props {
 const PostulanteCard = ({
   application,
   statusOptions,
-  getStatusLabel,
+  /* getStatusLabel, */
   getStatusColor,
   onUpdateStatus,
   onViewProfile,

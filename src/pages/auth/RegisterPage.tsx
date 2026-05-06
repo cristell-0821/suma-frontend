@@ -39,8 +39,8 @@ const RegisterPage = () => {
     ciudadId: string;
   } | null>(null);
 
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [, setError] = useState('');
+  const [, setLoading] = useState(false);
 
   // Validar role param y setear step inicial
   useEffect(() => {
@@ -156,9 +156,9 @@ const RegisterPage = () => {
     }
   };
 
-  const goToLogin = () => {
+  /* const goToLogin = () => {
     navigate('/login');
-  };
+  }; */
 
   const goBack = () => {
     if (step === 'postulante2') {

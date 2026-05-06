@@ -67,7 +67,7 @@ interface Props {
 
 const MODALIDADES = ['REMOTO', 'HIBRIDO', 'PRESENCIAL'];
 
-const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, onCVUpload, onFotoUpload, isSaving }: Props) => {
+const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, onCVUpload, isSaving }: Props) => {
   const [formData, setFormData] = useState<ProfileFormData>({
     nombres: '',
     apellidos: '',
@@ -93,7 +93,7 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
   const [sectores, setSectores] = useState<Sector[]>([]);
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [ciudades, setCiudades] = useState<Ciudad[]>([]);
-  const [ciudadesPreferidas, setCiudadesPreferidas] = useState<Ciudad[]>([]);
+  const [, setCiudadesPreferidas] = useState<Ciudad[]>([]);
   const [loadingSectores, setLoadingSectores] = useState(false);
   const [loadingDepartamentos, setLoadingDepartamentos] = useState(false);
 
@@ -231,7 +231,7 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
   };
 
   // Manejar cambio de departamento para ciudad preferida
-  const handleDepartamentoCiudadPreferidaChange = async (deptoId: string) => {
+  /* const handleDepartamentoCiudadPreferidaChange = async (deptoId: string) => {
     if (!deptoId) {
       setCiudadesPreferidas([]);
       handleChange('ciudadPreferidaId', '');
@@ -244,7 +244,7 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
     } catch {
       setCiudadesPreferidas([]);
     }
-  };
+  }; */
 
   const addSkill = () => {
     const trimmed = skillInput.trim();
@@ -309,7 +309,7 @@ const ProfileEditModal = ({ profile, allDisabilities, isOpen, onClose, onSave, o
   };
 
   const deptoCiudadId = getDepartamentoIdForCiudad(formData.ciudadId);
-  const deptoCiudadPreferidaId = getDepartamentoIdForCiudad(formData.ciudadPreferidaId);
+  //const deptoCiudadPreferidaId = getDepartamentoIdForCiudad(formData.ciudadPreferidaId);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

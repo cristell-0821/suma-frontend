@@ -16,7 +16,7 @@ import PostulacionesPage from '../pages/postulante/PostulacionesPage';
 import PerfilPage from '../pages/postulante/PerfilPage';
 import DetalleEmpleoPage from '../pages/postulante/DetalleEmpleoPage';
 
-// Páginas empresa (NUEVAS)
+// Páginas empresa
 import EmpresaPerfilPage from '../pages/empresa/EmpresaPerfilPage';
 import VacantesPage from '../pages/empresa/VacantesPage';
 import PostulantesPage from '../pages/empresa/PostulantesPage';
@@ -37,7 +37,7 @@ const LoadingScreen = () => (
 // ============================================
 const AuthLoader = ({ children }: { children: ReactNode }) => {
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  /* const isAuthenticated = useAuthStore((s) => s.isAuthenticated); */
   const accessToken = useAuthStore((s) => s.accessToken);
   const checkAuth = useAuthStore((s) => s.checkAuth);
   const hasChecked = useRef(false);
@@ -53,7 +53,7 @@ const AuthLoader = ({ children }: { children: ReactNode }) => {
       checkAuth();
     }
     // Si no hay token, no hay nada que verificar — ya está isAuthenticated: false
-  }, [hasHydrated]); // ← solo depende de hasHydrated, sin checkAuth ni accessToken
+  }, [hasHydrated]);
 
   if (!hasHydrated) {
     return <LoadingScreen />;
@@ -143,7 +143,7 @@ const AppRouter = () => {
             }
           />
           
-          {/* Empresa — RUTAS NUEVAS */}
+          {/* Empresa */}
           <Route 
             path="/empresa/perfil" 
             element={
@@ -178,6 +178,7 @@ const AppRouter = () => {
             } 
           />
 
+          {/* ADMIN */}
           <Route 
             path="/admin/*" 
             element={

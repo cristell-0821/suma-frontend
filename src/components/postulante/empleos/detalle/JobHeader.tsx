@@ -11,7 +11,7 @@ interface Props {
   isApplying?: boolean;
 }
 
-const JobHeader = ({ offer, onApply, onSave, isSaved, hasApplied = false, isApplying = false }: Props) => {
+const JobHeader = ({ offer, onApply, hasApplied = false, isApplying = false }: Props) => {
   const modalityLabels: Record<string, string> = {
     REMOTO: 'Remoto',
     HIBRIDO: 'Híbrido',

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ListFilter, ArrowRight, MapPin } from 'lucide-react';
+import { ListFilter, MapPin } from 'lucide-react';
 import { sectorsService } from '../../../services/sectorsService';
 import { locationsService } from '../../../services/locationsService';
 import type { Disability } from './types';

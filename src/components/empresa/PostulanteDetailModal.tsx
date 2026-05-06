@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { X, Mail, Phone, MapPin, Calendar, Briefcase, FileText, Globe, DollarSign, Loader2, ExternalLink } from 'lucide-react';
+import { X, Mail, Phone, MapPin, Calendar, FileText, Globe, DollarSign, ExternalLink } from 'lucide-react';
 import type { Application, ApplicationStatus } from '../../types/application';
 
 interface StatusOption {

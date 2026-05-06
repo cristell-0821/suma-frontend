@@ -5,7 +5,7 @@ import { UserPlus, Network, PartyPopper, ArrowRight } from "lucide-react";
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
 
   const getToken = () => localStorage.getItem('accessToken');
 
@@ -29,7 +29,7 @@ const HomePage = () => {
     }
   };
 
-  const handleShowMyPotential = () => {
+  /* const handleShowMyPotential = () => {
     const token = getToken();
     if (!token) {
       navigate('/login');
@@ -40,7 +40,7 @@ const HomePage = () => {
     } else if (user?.role === 'EMPRESA') {
       navigate('/empresa');
     }
-  };
+  }; */
 
   const STEPS = [
     {

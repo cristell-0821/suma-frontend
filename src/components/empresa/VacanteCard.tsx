@@ -11,7 +11,7 @@ interface Props {
 }
 
 const VacanteCard = ({ vacante, onEdit, onToggle, onDelete, onDuplicate }: Props) => {
-  const [isHovered, setIsHovered] = useState(false);
+  const [ ,setIsHovered] = useState(false);
 
   const getStatusConfig = () => {
     if (vacante.isActive) {

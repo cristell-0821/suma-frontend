@@ -1,4 +1,4 @@
-import { Building2, Globe, Heart, Link2, Mail } from 'lucide-react';
+import { Building2, Globe, Heart } from 'lucide-react';
 import type { JobOffer } from '../types';
 
 interface Props {
@@ -6,7 +6,7 @@ interface Props {
 }
 
 const JobSidebar = ({ offer }: Props) => {
-  const handleShare = () => {
+  /* const handleShare = () => {
     if (navigator.share) {
       navigator.share({
         title: `${offer.titulo} - ${offer.empresa.razonSocial}`,
@@ -16,7 +16,7 @@ const JobSidebar = ({ offer }: Props) => {
     } else {
       navigator.clipboard.writeText(window.location.href);
     }
-  };
+  }; */
 
   // ✅ Extraer string ANTES de JSX
   const sectorNombre = typeof offer.sector === 'string'
