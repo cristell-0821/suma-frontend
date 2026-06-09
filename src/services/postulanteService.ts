@@ -67,7 +67,7 @@ export const postulanteService = {
     return response.data;
   },
   updateProfilePhoto: async (fotoPerfil: string | null) => {
-    const { data } = await api.patch('/postulantes/perfil/foto', { fotoPerfil });
+    const { data } = await api.put('/postulantes/perfil', { fotoPerfil });
     return data;
   },
 };

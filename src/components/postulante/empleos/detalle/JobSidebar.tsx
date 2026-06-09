@@ -1,5 +1,6 @@
-import { Building2, Globe, Heart } from 'lucide-react';
+import { Building2, Heart } from 'lucide-react';
 import type { JobOffer } from '../types';
+import { Link } from 'react-router-dom';
 
 interface Props {
   offer: JobOffer;
@@ -18,31 +19,40 @@ const JobSidebar = ({ offer }: Props) => {
     }
   }; */
 
-  // ✅ Extraer string ANTES de JSX
-  const sectorNombre = typeof offer.sector === 'string'
-    ? offer.sector
-    : offer.sector?.nombre || 'Sector no especificado';
-
   return (
     <aside className="space-y-6">
       {/* Info Empresa */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-cream-200">
         <h3 className="text-lg font-bold text-brown mb-4 font-sans">Sobre la empresa</h3>
-        <p className="text-brown/60 text-sm leading-relaxed mb-5">
-          {offer.empresa.razonSocial} es una empresa comprometida con la diversidad e inclusión laboral.
-        </p>
-        <div className="space-y-3">
-          {offer.empresa.ruc && (
-            <div className="flex items-center gap-3 text-sm">
-              <Building2 className="w-4 h-4 text-coral" />
-              <span className="text-brown/70">RUC: {offer.empresa.ruc}</span>
+        
+        <div className="flex items-center gap-3 mb-4">
+          {offer.empresa.logoUrl ? (
+            <img src={offer.empresa.logoUrl} className="w-12 h-12 rounded-xl object-cover" />
+          ) : (
+            <div className="w-12 h-12 rounded-xl bg-cream-100 flex items-center justify-center">
+              <Building2 className="w-6 h-6 text-brown/30" />
             </div>
           )}
-          <div className="flex items-center gap-3 text-sm">
-            <Globe className="w-4 h-4 text-coral" />
-            <span className="text-brown/70">{sectorNombre}</span>
+          <div>
+            <p className="font-bold text-brown text-sm">{offer.empresa.razonSocial}</p>
+            {offer.empresa.isVerified && (
+              <span className="text-xs text-teal font-medium">✓ Verificada</span>
+            )}
           </div>
         </div>
+
+        {offer.empresa.descripcion && (
+          <p className="text-brown/60 text-sm leading-relaxed mb-4">
+            {offer.empresa.descripcion.slice(0, 120)}...
+          </p>
+        )}
+
+        <Link
+          to={`/empresas/${offer.empresa.id}`}
+          className="w-full flex items-center justify-center gap-2 bg-cream-50 text-brown py-2.5 rounded-xl hover:bg-cream-100 transition-colors text-sm font-medium"
+        >
+          Ver perfil completo
+        </Link>
       </div>
 
       {/* Compartir */}

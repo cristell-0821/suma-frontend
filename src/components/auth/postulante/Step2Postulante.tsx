@@ -11,9 +11,11 @@ interface Step2PostulanteProps {
     ciudadId: string;
   }) => void;
   onBack: () => void;
+  error?: string;
+  loading?: boolean; 
 }
 
-const Step2Postulante = ({ onSubmit, onBack }: Step2PostulanteProps) => {
+const Step2Postulante = ({ onSubmit, onBack, error, loading }: Step2PostulanteProps) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -22,7 +24,6 @@ const Step2Postulante = ({ onSubmit, onBack }: Step2PostulanteProps) => {
     ciudadId: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [ciudades, setCiudades] = useState<Ciudad[]>([]);
@@ -73,7 +74,6 @@ const Step2Postulante = ({ onSubmit, onBack }: Step2PostulanteProps) => {
     if (!formData.email || !formData.password || !formData.telefono || !formData.ciudadId) {
       return;
     }
-    setLoading(true);
     onSubmit({
       email: formData.email,
       password: formData.password,
@@ -241,18 +241,18 @@ const Step2Postulante = ({ onSubmit, onBack }: Step2PostulanteProps) => {
 
               {/* Submit */}
                <button
-                type="submit"
-                disabled={loading || !formData.email || !formData.password || !formData.telefono || !formData.ciudadId}
-                className={`
-                  w-full py-5 font-['Plus_Jakarta_Sans'] font-bold text-lg rounded-xl transition-all mt-4
-                  ${!loading && formData.email && formData.password && formData.telefono && formData.ciudadId
-                    ? 'bg-[#fd7549] text-white hover:opacity-90 active:scale-[0.98] shadow-lg shadow-[#fd7549]/20'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }
-                `}
-              >
-                {loading ? 'Registrando...' : 'Finalizar registro'}
-              </button>
+                  type="submit"
+                  disabled={loading || !formData.email || !formData.password || !formData.telefono || !formData.ciudadId}
+                  className={`
+                    w-full py-5 font-['Plus_Jakarta_Sans'] font-bold text-lg rounded-xl transition-all mt-4
+                    ${!loading && formData.email && formData.password && formData.telefono && formData.ciudadId
+                      ? 'bg-[#fd7549] text-white hover:opacity-90 active:scale-[0.98] shadow-lg shadow-[#fd7549]/20'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }
+                  `}
+                >
+                  {loading ? 'Registrando...' : 'Finalizar registro'}
+                </button>
             </form>
           </section>
 

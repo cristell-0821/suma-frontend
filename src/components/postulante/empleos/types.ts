@@ -10,6 +10,7 @@ export interface Empresa {
   isVerified: boolean;
   logo?: string;
   logoUrl?: string; 
+  descripcion?: string;
 }
 
 export interface Sector {
@@ -34,7 +35,7 @@ export interface JobOffer {
   requisitos?: string | string[];
   empresa: Empresa;
   modalidad: 'REMOTO' | 'HIBRIDO' | 'PRESENCIAL';
-  tipoJornada: string;
+  tipoJornada?: string; 
   sectorId?: string;
   sector?: Sector;
   ciudadId?: string;
@@ -45,6 +46,7 @@ export interface JobOffer {
   accesibilidadFeatures: string[];
   createdAt: string;
   isRecommended?: boolean;
+  isActive: boolean; 
 }
 
 export interface JobOfferDetail extends JobOffer {

@@ -18,7 +18,6 @@ export interface EmpresaProfile {
   telefonoContacto?: string;
   logoUrl?: string;
   portadaUrl?: string;
-  isApproved: boolean;
   isVerified: boolean;
   accommodations: string[];
   jobOffersCount?: number;
@@ -109,6 +108,11 @@ export const empresaService = {
 
   toggleJobOffer: async (offerId: string) => {
     const response = await api.patch(`/job-offers/${offerId}/toggle`);
+    return response.data;
+  },
+
+  getPublicProfile: async (id: string) => {
+    const response = await api.get(`/empresas/${id}/publico`);
     return response.data;
   },
 };

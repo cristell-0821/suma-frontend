@@ -19,8 +19,15 @@ const EmpresaPerfilPage = () => {
   const [photoType, setPhotoType] = useState<'logo' | 'portada'>('logo');
 
   useEffect(() => {
-    loadProfile();
+    loadProfile().then(() => {
+    });
   }, []);
+
+  useEffect(() => {
+    if (empresa?.logoUrl) {
+      updateUserLogo(empresa.logoUrl);
+    }
+  }, [empresa?.logoUrl]); 
 
   const loadProfile = async () => {
     setLoading(true);
@@ -28,11 +35,6 @@ const EmpresaPerfilPage = () => {
       const data = await empresaService.getProfile();
       setEmpresa(data);
       setError('');
-      
-      // ← Mover aquí DENTRO del try
-      if (data.logoUrl) {
-        updateUserLogo(data.logoUrl);
-      }
     } catch {
       setError('Error al cargar el perfil de empresa');
     } finally {
@@ -53,37 +55,19 @@ const EmpresaPerfilPage = () => {
     }
   };
 
-  const handleLogoClick = () => {
-    setPhotoType('logo');
-    setIsPhotoModalOpen(true);
-  };
-
-  const handlePortadaClick = () => {
-    setPhotoType('portada');
+  const handleOpenPhotoModal = (type: 'logo' | 'portada') => {
+    setPhotoType(type);
     setIsPhotoModalOpen(true);
   };
 
   const updateUserLogo = useAuthStore((s) => s.updateUserLogo);
 
   const handlePhotoUpdate = async (url: string | null, type: 'logo' | 'portada') => {
-    if (!empresa) return;
-
-    try {
-      // Guardar en backend
-      await empresaService.updateProfile({
-        [type === 'logo' ? 'logoUrl' : 'portadaUrl']: url || '',
-      });
-
-      // Sincronizar logo en authStore ANTES de recargar
-      if (type === 'logo') {
-        updateUserLogo(url || undefined);
-      }
-
-      // Recargar perfil para sincronizar
-      await loadProfile();
-    } catch {
-      setError('Error al actualizar la imagen');
+    if (type === 'logo') {
+      updateUserLogo(url || undefined);
     }
+    // portada no toca el authStore
+    await loadProfile();
   };
 
   if (loading) {
@@ -112,8 +96,8 @@ const EmpresaPerfilPage = () => {
         <EmpresaHeader
           empresa={empresa}
           onEdit={() => setIsEditing(true)}
-          onLogoClick={handleLogoClick}
-          onPortadaClick={handlePortadaClick}
+          onLogoClick={() => handleOpenPhotoModal('logo')}
+          onPortadaClick={() => handleOpenPhotoModal('portada')}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

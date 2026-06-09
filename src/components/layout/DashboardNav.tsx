@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { LogOut, User,FileText, Users, Search } from 'lucide-react';
 import { useEffect } from 'react';
+import { useNotifications } from '../../hooks/useNotifications';
 
 interface NavItem {
   label: string;
@@ -11,6 +12,7 @@ interface NavItem {
 const postulanteNav: NavItem[] = [
   { label: 'Inicio', path: '/' },
   { label: 'Empleos', path: '/postulante/empleos' },
+  { label: 'Postulaciones', path: '/postulante/postulaciones' },
   { label: 'Mi Perfil', path: '/postulante/perfil' },
 ];
 
@@ -47,6 +49,8 @@ const DashboardNav = () => {
     return location.pathname.startsWith(path);
   };
 
+  const { unreadCount, markAllAsSeen } = useNotifications(isPostulante);
+
   return (
     <header className="bg-cream-50/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm border-b border-cream-100">
       <nav className="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
@@ -63,14 +67,22 @@ const DashboardNav = () => {
             {navItems.map((item) => (
               <button
                 key={item.path}
-                onClick={() => navigate(item.path)}
-                className={`font-sans font-medium text-base transition-colors ${
+                onClick={() => {
+                  if (item.path === '/postulante/postulaciones') markAllAsSeen();
+                  navigate(item.path);
+                }}
+                className={`relative font-sans font-medium text-base transition-colors ${
                   isActive(item.path)
                     ? 'text-teal border-b-2 border-teal pb-1'
                     : 'text-brown hover:text-teal'
                 }`}
               >
                 {item.label}
+                {item.path === '/postulante/postulaciones' && unreadCount > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-coral text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -108,17 +120,19 @@ const DashboardNav = () => {
                 Mi Perfil
               </button>
               <button
-                onClick={() => navigate(isPostulante ? '/postulante/postulaciones' : '/empresa/postulantes')}
-                className="w-full text-left px-4 py-2.5 text-sm text-brown/70 hover:text-teal hover:bg-cream-50 transition-colors"
+                onClick={() => {
+                  markAllAsSeen();
+                  navigate(isPostulante ? '/postulante/postulaciones' : '/empresa/postulantes');
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm text-brown/70 hover:text-teal hover:bg-cream-50 transition-colors flex items-center gap-2"
               >
-                <span className="material-symbols-outlined text-base align-text-bottom mr-2">
-                  {isPostulante ? (
-                    <FileText className="w-4 h-4 mr-2" />
-                  ) : (
-                    <Users className="w-4 h-4 mr-2" />
-                  )}
-                </span>
-                {isPostulante ? 'Mis Postulaciones' : 'Postulantes'}
+                {isPostulante ? <FileText className="w-4 h-4" /> : <Users className="w-4 h-4" />}
+                <span className="flex-1">{isPostulante ? 'Mis Postulaciones' : 'Postulantes'}</span>
+                {isPostulante && unreadCount > 0 && (
+                  <span className="bg-coral text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {unreadCount}
+                  </span>
+                )}
               </button>
               <div className="border-t border-cream-100">
                 <button

@@ -10,9 +10,11 @@ interface Step2EmpresaProps {
     telefonoContacto: string;
   }) => void;
   onBack: () => void;
+  error?: string;
+  loading?: boolean; 
 }
 
-const Step2Empresa = ({ onSubmit, onBack }: Step2EmpresaProps) => {
+const Step2Empresa = ({ onSubmit, onBack, error, loading  }: Step2EmpresaProps) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -161,6 +163,12 @@ const Step2Empresa = ({ onSubmit, onBack }: Step2EmpresaProps) => {
             </div>
           </div>
 
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm mb-4">
+              {error}
+            </div>
+          )}
+
           {/* Footer */}
           <div className="flex items-center justify-between pt-4 shrink-0 gap-4">
             <p className="text-[#3d4943] text-sm italic">
@@ -168,16 +176,16 @@ const Step2Empresa = ({ onSubmit, onBack }: Step2EmpresaProps) => {
             </p>
             <button
               type="submit"
-              disabled={!formData.email || !formData.password || !formData.nombreContacto || !formData.telefonoContacto}
+              disabled={loading || !formData.email || !formData.password || !formData.nombreContacto || !formData.telefonoContacto}
               className={`
                 font-bold text-lg px-10 py-4 rounded-xl transition-all shadow-lg
-                ${formData.email && formData.password && formData.nombreContacto && formData.telefonoContacto
+                ${!loading && formData.email && formData.password && formData.nombreContacto && formData.telefonoContacto
                   ? 'bg-[#fd7549] text-white hover:opacity-90 active:scale-95'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }
               `}
             >
-              Finalizar registro
+              {loading ? 'Creando cuenta...' : 'Finalizar registro'}
             </button>
           </div>
         </form>

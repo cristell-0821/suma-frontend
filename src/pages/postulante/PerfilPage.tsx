@@ -58,11 +58,11 @@ const PerfilPage = () => {
   const handleSave = async (formData: ProfileUpdatePayload) => {
     setSaving(true);
     try {
-      // Limpiar campos vacíos antes de enviar
       const cleanPayload: ProfileUpdatePayload = Object.fromEntries(
-        Object.entries(formData).filter(([_, v]) => 
-          v !== '' && v !== undefined && !(Array.isArray(v) && v.length === 0)
-        )
+        Object.entries(formData).filter(([_, v]) => {
+          if (Array.isArray(v)) return true;
+          return v !== '' && v !== undefined;
+        })
       ) as ProfileUpdatePayload;
 
       await postulanteService.updateProfile(cleanPayload);

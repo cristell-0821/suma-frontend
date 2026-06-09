@@ -14,7 +14,7 @@ interface Props {
   isSaving?: boolean;
 }
 
-const TAMAÑOS = ['Pequeña (1-50)', 'Mediana (51-250)', 'Grande (250+)'];
+const TAMAÑOS = ['Pequeña (1-10)', 'Mediana (11-50)', 'Grande (51-200)', 'Corporativo (200+)'];
 
 const EmpresaEditModal = ({ empresa, isOpen, onClose, onSave, isSaving }: Props) => {
   const [formData, setFormData] = useState<UpdateEmpresaPayload>({});

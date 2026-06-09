@@ -31,13 +31,14 @@ interface Empresa {
 
 const AdminDashboard = () => {
   const { user, logout } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<'todas' | 'verificadas' | 'deshabilitadas'>('todas');
+  const [activeTab, setActiveTab] = useState<'todas' | 'pendientes' | 'verificadas' | 'deshabilitadas'>('todas');
   const [stats, setStats] = useState<any>(null);
   const [companies, setCompanies] = useState<Empresa[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [pendingCompanies, setPendingCompanies] = useState<Empresa[]>([]);
   /* const [selectedCompany, setSelectedCompany] = useState<Empresa | null>(null); */
 
   useEffect(() => {
@@ -57,8 +58,12 @@ const AdminDashboard = () => {
   const loadCompanies = async () => {
     setLoading(true);
     try {
-      const data = await adminService.getAllCompanies();
-      setCompanies(data.empresas);
+      const [allData, pendingData] = await Promise.all([
+        adminService.getAllCompanies(),
+        adminService.getPendingCompanies(),
+      ]);
+      setCompanies(allData.empresas);
+      setPendingCompanies(pendingData.empresas);
     } catch {
       setError('Error al cargar empresas');
     } finally {
@@ -90,12 +95,13 @@ const AdminDashboard = () => {
     }
   };
 
-  const filteredCompanies = companies.filter((emp) => {
+  const filteredCompanies = (activeTab === 'pendientes' ? pendingCompanies : companies).filter((emp) => {
     const matchesSearch = 
       emp.razonSocial?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       emp.ruc?.includes(searchQuery) ||
       emp.user?.email?.toLowerCase().includes(searchQuery.toLowerCase());
     
+    if (activeTab === 'pendientes') return matchesSearch;
     if (activeTab === 'verificadas') return matchesSearch && emp.isVerified;
     if (activeTab === 'deshabilitadas') return matchesSearch && !emp.isActive;
     return matchesSearch;
@@ -189,6 +195,10 @@ const AdminDashboard = () => {
             <div className="flex gap-1 bg-cream-50 p-1 rounded-xl">
               {[
                 { key: 'todas', label: 'Todas' },
+                { 
+                  key: 'pendientes', 
+                  label: `Pendientes${pendingCompanies.length > 0 ? ` (${pendingCompanies.length})` : ''}`,
+                },
                 { key: 'verificadas', label: 'Verificadas' },
                 { key: 'deshabilitadas', label: 'Deshabilitadas' },
               ].map((tab) => (

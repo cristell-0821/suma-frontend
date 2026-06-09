@@ -39,8 +39,8 @@ const RegisterPage = () => {
     ciudadId: string;
   } | null>(null);
 
-  const [, setError] = useState('');
-  const [, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Validar role param y setear step inicial
   useEffect(() => {
@@ -124,6 +124,7 @@ const RegisterPage = () => {
     telefonoContacto: string;
   }) => {
     if (!empresaData) return;
+    console.log('empresaData al hacer submit:', empresaData);
 
     setLoading(true);
     setError('');
@@ -181,6 +182,8 @@ const RegisterPage = () => {
       <Step2Postulante
         onSubmit={handlePostulanteStep2}
         onBack={goBack}
+        error={error}
+        loading={loading}
       />
     );
   }
@@ -194,6 +197,8 @@ const RegisterPage = () => {
       <Step2Empresa
         onSubmit={handleEmpresaStep2}
         onBack={goBack}
+        error={error}
+        loading={loading}
       />
     );
   }

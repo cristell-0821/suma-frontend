@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Loader2 } from 'lucide-react';
+import { Plus, Search, Filter, Loader2, ShieldX } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import VacanteCard from '../../components/empresa/VacanteCard';
 import { empresaService } from '../../services/empresaService';
@@ -16,6 +16,7 @@ const VacantesPage = () => {
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('todos');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingVacante, setEditingVacante] = useState<Vacante | null>(null);
+  const [empresaVerificada, setEmpresaVerificada] = useState<boolean | null>(null);
 
   useEffect(() => {
     loadVacantes();
@@ -24,8 +25,12 @@ const VacantesPage = () => {
   const loadVacantes = async () => {
     setLoading(true);
     try {
-      const data = await empresaService.getMyJobOffers();
-      setVacantes(data);
+      const [vacanteData, perfilData] = await Promise.all([
+        empresaService.getMyJobOffers(),
+        empresaService.getProfile(),
+      ]);
+      setVacantes(vacanteData);
+      setEmpresaVerificada(perfilData.isVerified);
       setError('');
     } catch {
       setError('Error al cargar las vacantes');
@@ -99,13 +104,20 @@ const VacantesPage = () => {
               Gestiona tus procesos de selección con un enfoque humano e inclusivo.
             </p>
           </div>
-          <button
-            onClick={handleCreate}
-            className="bg-teal text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 hover:bg-teal-600 active:scale-95 transition-all shadow-lg shadow-teal/20 shrink-0"
-          >
-            <Plus className="w-5 h-5" />
-            Publicar Nueva Vacante
-          </button>
+          {empresaVerificada ? (
+            <button
+              onClick={handleCreate}
+              className="bg-teal text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 hover:bg-teal-600 active:scale-95 transition-all shadow-lg shadow-teal/20 shrink-0"
+            >
+              <Plus className="w-5 h-5" />
+              Publicar Nueva Vacante
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 px-6 py-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-sm">
+              <ShieldX className="w-4 h-4 shrink-0" />
+              Tu empresa está pendiente de verificación
+            </div>
+          )}
         </div>
 
         {/* Filtros */}
@@ -159,7 +171,7 @@ const VacantesPage = () => {
                 ? 'No hay vacantes que coincidan con tu búsqueda'
                 : 'Aún no has publicado ninguna vacante'}
             </p>
-            {!searchQuery && statusFilter === 'todos' && (
+            {!searchQuery && statusFilter === 'todos' && empresaVerificada && (
               <button
                 onClick={handleCreate}
                 className="bg-teal text-white px-6 py-3 rounded-xl font-bold hover:bg-teal-600 transition-all"

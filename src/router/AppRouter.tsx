@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import HomePage from '../pages/public/HomePage';
+import EmpresaPublicaPage from '../pages/public/EmpresaPublicaPage';
 
 // Páginas postulante
 import EmpleosPage from '../pages/postulante/EmpleosPage';
@@ -108,6 +109,7 @@ const AppRouter = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />
+          <Route path="/empresas/:id" element={<EmpresaPublicaPage />} />
           
           {/*  POSTULANTE */}
           <Route 

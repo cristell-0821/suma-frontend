@@ -18,14 +18,11 @@ const EmpresaPhotoModal = ({ isOpen, onClose, type, currentUrl, onPhotoUpdate }:
   const isLogo = type === 'logo';
   const title = isLogo ? 'Logo de empresa' : 'Foto de portada';
 
-  const {
-    fileInputRef,
-    isUploading,
-    uploadError,
-    openFilePicker,
-    handleFileChange,
-    clearError,
-  } = isLogo ? useLogoEmpresaUpload() : usePortadaEmpresaUpload();
+  const logoUpload = useLogoEmpresaUpload();
+  const portadaUpload = usePortadaEmpresaUpload();
+
+  const { fileInputRef, isUploading, uploadError, openFilePicker, handleFileChange, clearError } =
+    isLogo ? logoUpload : portadaUpload;
 
   // Reset state when opening
   useEffect(() => {
